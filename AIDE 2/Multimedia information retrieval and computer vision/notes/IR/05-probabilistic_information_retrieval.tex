@@ -1,0 +1,252 @@
+\subsection{Probabilistic information retrieval}
+\label{sec:probabilistic_information_retrieval}
+
+Thus far the queries have all been boolean queries.
+Most of times boolean queries return 0 or too many results.
+We want to return results ordered by usefulness.
+We need probability to calculate the usefulness of a document.
+
+We have a collection of documents.
+A user issues a query.
+A list of $k$ documents must be returned.
+In what order do we present these documents?
+How can we compute the best order?
+We rank the documents in the collection according to the probability
+that the document is relevant to the query.
+$P(\text{relevant}|\text{document},\text{query})$.
+
+A user has an information need.
+This user encodes this need as a textual query.
+A user expresses a relevance judgment on a given document for a given
+information need expressed as a query.
+A relevance judgment is associated with a document-query pair.
+Those judgments are hidden and not explicitly observable.
+A relevance is a document property depending uniquely on the 
+information need. It's independent from other documents.
+A relevance judgment is a binary variable.
+
+The \textbf{probabilistic ranking principle} states that the best way 
+(with respect to effectiveness) to rank a set of documents
+is by decreasing probability of relevance.
+
+Relevance is a binary random variable $R$.
+The query is a random variable $Q$ with generic value $q$.
+Document $D$ is a random variable with generic value $d$.
+We denote $P(R=r|Q=q,R=r)$ with $P(r|d,q)$ for brevity.
+The system returns $k$ documents in decreasing order of $P(r|d,q)$.
+Those documents are called $d_1,\dots,d_k$.
+Recall $R_k$ is a random variable denoting the number of 
+relevant documents retrieved for a given query so it's in $\{0,\dots,k\}$.
+The overall effectiveness is measured by expected number
+of relevant documents retrieved $E[R_k]$.
+
+With those assumptions the maximum value we can achieve of $E[R_k]$
+is obtained with the \textbf{probabilistic ranking principle}.
+\[
+    E[R_k] = r\sum_{i=1}^{k}P(r|d_i,q)+\bar{r}\sum_{i=1}^{k}P(\bar{r}|d_i,q) = 
+    \sum_{i=1}^{k}P(r|d_i,q)
+\]
+
+The easiest way to prove this is by contradiction.
+Assume that the best way to rank documents is not by decreasing
+probability of relevance.
+Then there exists a ranking that is better than the one given by
+the probabilistic ranking principle.
+So it means that there is at least a document $d_l$ with $l<k$such that
+$P(r|d_l,q)$ is less than $P(r|d_{\bar k},q)$ with $\bar k>k$.
+If we swap $d_l$ with $d_k$ we get a better $E[R_k]$.
+
+It's important to note that in the assumptions we said that
+the probability does not depend on:
+\begin{itemize}
+    \item other users.
+    \item other information needs.
+    \item other queries of the same user.
+    \item other documents returned for the same query.
+\end{itemize}
+
+Maximizing $E[R_k]$ is equivalent to maximizing precision and recall
+at cutoff $k$.
+
+If the probability depends on the user, the PRP is not necessarily valid.
+
+We want to estimate $P(r|d,q)$. We can use Bayes' theorem.
+\[
+    P(r|d,q) = \frac{P(d|r,q)P(r)}{P(d)}
+\]
+$P(d|r,q)$ is the probability of observing document $d$ given that
+it is relevant to query $q$.
+$P(r)$ is the prior probability retrieving a relevant document at random.
+$P(d)$ is the probability of observing document $d$.
+\begin{itemize}
+    \item Estimate how each term contributes to the relevance.
+    \item We assume that terms not appearing in the document have 0 contribution.
+    \item How do term occurrences influence the relevance of a document.
+    \item How do document lengths influence the relevance of a document.
+    \item Combine term contributions together to dinf the document relevance.
+    \item Order documents by decreasing relevance.
+\end{itemize}
+
+\subsubsection{Binary Independence Model}
+\label{sec:binary_independence_model}
+
+Every document $d$ is represented as a binary vector of terms.
+This vector is $x_d = (x_{d1},\dots,x_{dn})$ where $x_{di}$ is 1 if
+term $i$ appears in document $d$ and 0 otherwise.
+
+This model assumes that each term is independent of the others.
+
+We are not going to compute probabilities because it's too difficult.
+We will compute a score that will be ordered in the same way as the
+probabilities.
+
+We will use \textbf{rank-preserving functions}. These functions
+are functions that preserve the ordering of the inputs.
+(Not that different from monotonic functions).
+
+Given an event $E$ the odds of $E$ are defined as:
+\[
+    O(E) = \frac{P(E)}{P(\bar{E})} = \frac{P(E)}{1-P(E)}
+\]
+This is a \textbf{rank-preserving function}.
+
+The odds of being relevant given a document and a query are:
+\[
+    O(r|d,q) = \frac{P(r|d,q)}{P(\bar{r}|d,q)} = 
+        \frac{P(r|q)}{P(\bar{r}|q)}\frac{P(d|r,q)}{P(d,\bar{r},q)}
+\]
+The first fraction $\frac{P(r|q)}{P(\bar{r}|q)}$ is a constant and 
+does not influence the ranking.
+We use the independence assumption:
+(We use $p_i=P(x_i=1|r,q)$ and $r_i=P(x_i=1|\bar{r},q)$ 
+then $P(x_i=0|r,q)=1-p_i$ and $P(x_i=0|\bar{r},q)=1-r_i$
+$x_i$ is the $i$-th term in the document).
+\[
+    \frac{P(d|r,q)}{P(d,\bar{r},q)} =
+        \prod_{x_i=1}\frac{p_i}{r_i}\prod_{x_i=0}\frac{1-p_i}{1-r_i}
+\]
+We apply the hypothesis:
+\[
+    O(r|d,q)\propto\prod_{x_i=1,q_i=1}\frac{p_i}{r_i}
+        \prod_{x_i=0,q_i=1}\frac{1-p_i}{1-r_i}
+\]
+We multiply and divide by $prod_{x_i=1,q_i=1}\frac{1-p_i}{1-r_i}$.
+\[
+    O(r|d,q)\propto\prod_{x_i=1,q_i=1}\frac{p_i(1-r_i)}{r_i(1-p_i)}
+        \prod_{q_i=1}\frac{1-p_i}{1-r_i}
+\]
+For a given query $\prod_{q_i=1}\frac{1-p_i}{1-r_i}$ is constant.
+So
+\[
+    O(r|d,q)\propto\prod_{x_i=1,q_i=1}\frac{p_i(1-r_i)}{r_i(1-p_i)}
+\]
+The product is carried out only for terms that appear both in the query
+and in the document.
+The output of this function is really close to 0 so we use the
+logarithm to make it more readable.
+Of course $log$ is a \textbf{rank-preserving function}.
+\[
+    \text{RSV}=log\prod_{x_i=1,q_i=1}\frac{p_i(1-r_i)}{r_i(1-p_i)} =
+        \sum_{x_i=1,q_i=1}log\frac{p_i(1-r_i)}{r_i(1-p_i)} =
+        \sum_{x_i=1,q_i=1} c_i
+\]
+Where $c_i=log\frac{p_i(1-r_i)}{r_i(1-p_i)}$.
+We only need to compute $p_i$ and $r_i$.
+We need to find a way to estimate $p_i$ and $r_i$.
+Let's assume that we have a random sample of our collection with complete
+relevance judgments.
+Let
+\begin{enumerate}
+    \item $N$ be the number of documents in the collection.
+    \item $n_i$ be the number of documents in the sample containing term $i$.
+    \item $R$ be the number of relevant documents in the collection.
+    \item $r_i$ be the number of relevant documents in the sample containing term $i$.
+\end{enumerate}
+
+We add constants to make the computation more stable and in the end we get:
+\[
+    p_i = \frac{r_i+0.5}{R+1}\\
+    r_i = \frac{n_i-r_i+0.5}{N-R+1}
+\]
+Keep in mind that $p_i$ is the probability of a term being in a relevant
+document and $r_i$ is the probability of a term being in a non-relevant
+document.
+
+The \textbf{Robertson/Sparck-Jones model} tells us that
+\[
+    c_i^{BIM} = w_i^{RSJ} = 
+        log\frac{(r_i+0.5)(N-R-n_i+r_i+0.5)}{(n_i-r_i+0.5)(R-r_i+0.5)}
+\]
+If we have no clue we can set $r_i=0$ and $p_i=0.5$.
+So the simplest way to compute the relevance of a document is using
+$log\frac{N}{n_i}$ and this is the \textbf{best match 1} aka \textbf{BM1} 
+aka \textbf{IDF}.
+
+\subsubsection{Generative models for documents}
+\label{sec:generative_models_for_documents}
+
+In a generative model we assume that the document is generated by
+randomly and independently selecting terms from a vocabulary using
+a multinomial distribution.
+Assuming that every term has the same probability of being selected
+is not realistic so we give each term a probability of being selected
+proportional to its frequency in the collection.
+We are only interested in the occurrences for each term, not in the order.
+We assume that the $tf$ follows a Poisson distribution.
+\[
+    f(k|\mu) = P(X=k|\mu) = \frac{\mu^ke^{-\mu}}{k!}
+\]
+
+The \textbf{1-Poisson model} works well with general words, but underperforms
+with topic-specific words.
+The \textbf{2-Poisson model} is better for topic-specific words.
+In the \textbf{2-Poisson model} we have a hidden binary random variable
+$E_i$ that is called eliteness for each document-term pair $i$.
+Its value is 1 if the document is about the topic represented by the term
+and 0 otherwise.
+The event $E_i=1$ is denoted as $e_i$ and the event $E_i=0$ is denoted as
+$\bar{e}_i$.
+So we have 
+\[
+    e_i^{elite}(tf) = log\frac{P(tf_i|r)P(0,|\bar{r})}{P(0|r)P(tf_i|\bar{r})}
+\]
+We can estimate $P(tf_i|r)$ like this:
+\[
+    P(tf_i|r) = \pi\frac{\lambda^k}{k!}e^{-\lambda}+(1-\pi)\frac{\mu^k}{k!}e^{-\mu}
+\]
+Where $\pi = P(e_i|r)$.
+Unfortunately we don't know $\pi$, $\lambda$ and $\mu$.
+
+How can we estimate $c_i^{elite}$?
+We can approximate it with 
+$c_i^{BM15}(tf_i)\approxeq log\frac{N}{n_i}\frac{tf_i}{k_1+tf_i}$.
+This is the \textbf{best match 15} aka \textbf{BM15} which is similar to
+\textbf{TFIDF} but with bounded term scores.
+
+Now we need to take in account the length of the document.
+We can have a long document because of its verbosity or because it's
+spanning multiple topics.
+We have cases in which longer documents provide an overinflated term frequency
+and cases in which the term frequency is uneffected by the size of the document.
+In real cases it's always an in-between. We have to find a normalizing factor.
+We can compute the average document length $\text{avdl}=\frac{1}{N}\sum_{d=1}^{N}dl_d$
+where $dl_d$ is the length of document $d$.
+We can then recompute the term frequency as $tf'_i(d_j)=tf_i(d_j)\frac{avdl}{dl_j}$.
+Using this in the \textbf{BM15} model we get the \textbf{BM11} model.
+
+What if we had a document that is really long but not verbose?
+We can use a partial normalization, interpolating between $tf$ and $tf'$ using a 
+parameter $b$. When $b=0$ we have no normalization, when $b=1$ we have full normalization.
+
+If we chose $b\approxeq0.75$ and $k_1\in[1.2,2]$ in this way we obtain the \textbf{Okapi BM25} model.
+
+We have everything we need in the inverted index and the document index.
+The only hyperparameters left are $k_1$ and $b$.
+\[
+    RSV^{BM25}(q,d) = 
+        \sum_{t_i\in q}\frac{tf_i(d)}{k_1((1-b)+b\frac{dl(d)}{avdl})+tf_i(d)}log\frac{N}{n_i}
+\]
+
+When we have multiple fields due to structure in the document we can use the \textbf{BM25F} model.
+This model calculates a weighted sum of the $tf$ for each field for a term.
+The weights are \textbf{really} difficult to estimate.

@@ -1,0 +1,81 @@
+\subsection{Feed forward language models}
+\label{sec:feed_forward_language_models}
+
+The problem with the n-gram model is that the size of the weight matrix grows exponentially with $n$.
+Most of the probabilities in this model are useless and are zero (LeCun).
+
+Yoshua Bengio et al. in 2003 proposed a neural network called \textbf{feedforward neural network language model}.
+
+This network uses embeddings to represent words. A word embedding is $e: V\rightarrow\mathbb{R}^{1\times d}$.
+To process word embeddings we need a matrix $E$ of size $|V|\times d$, this is called the \textbf{embedding matrix}.
+
+We do not know what is the best embedding matrix $E$ so we need to learn it (we start with a random matrix).
+
+To get a word embedding out of $E$ we just compute $e=wE$ where $w$ is the one-hot vector of the word.
+This step can be optimized by getting only the row of $E$ corresponding to the word but the result is the same.
+$E$ will be composed by 
+\[
+    E=\begin{bmatrix}
+        e_1 \\
+        \vdots \\
+        e_{|V|}
+    \end{bmatrix}
+\]
+
+(For all the lectures the bias is omitted for simplicity but without loss of generality).
+
+The feedforward layer is:
+\begin{itemize}
+    \item Given an activation function $\sigma$
+    \item Given a linear layer $y=xW$ with $W\in\mathbb{R}^{n\times m}$
+\end{itemize}
+
+A feedforward layer is a parametrized function $f(\cdot|\Theta)$
+s.t. $f(x|\Theta)=y=\sigma(xW)$.
+
+We can write the language model $P[w_i|w_{i-1},\dots,w_{i-n+1}]$ as \\
+$f(w_{i-1},\dots,w_{i-n+1})\rightarrow\mathbb{R}^{|V|}$.
+
+This function will be actually $|V|$ functions $g(e(w_{i-1}),\dots,e(w_{i-n+1}))\rightarrow\mathbb{R}$.
+$g$ takes the embeddings of the words and returns a real number.
+\[
+    g: \mathbb{R}^{(n-1)\times d}\rightarrow\mathbb{R}
+\]
+To implement $g$ we use an embedding layer $E$ and a feedforward layer.
+To get a vector from all the embeddings we just concatenate them so that we can feed them to the FF layer.
+
+The input of the FF layer will be $x_{i-1}E | \dots | x_{i-n+1}E = x$ where $x_{i}$ the one-hot vector of the word $w_i$.
+So the output of the FF layer will be $y=\sigma(xW)$ where $W\in\mathbb{R}^{(n-1)d\times h}$.
+$h$ is a hidden embedding dimension, we choose it.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm, auto]
+        % Nodes
+        \node (input) { $w_{i-1}|\dots|w_{i-n+1}$ };
+        \node (E) [draw, rectangle, minimum width=1.5cm, minimum height=1cm, right of=input, node distance=3cm] {E};
+        \node (concat) [draw, circle, right of=E, node distance=2cm] {concat};
+        \node (W1) [draw, trapezium, shape border rotate=270, trapezium left angle=60, trapezium right angle=60, minimum width=1.5cm, minimum height=1cm, right of=concat, node distance=3cm] {$W_1$};
+        \node (sigma) [draw, rectangle, right of=W1, node distance=2cm] {$\sigma$};
+        \node (W2) [draw, trapezium, shape border rotate=90, trapezium left angle=60, trapezium right angle=60, minimum width=1.5cm, minimum height=1cm, below of=input, node distance=2cm] {$W_2$};
+        \node (softmax) [draw, rectangle, right of=W2, node distance=4cm] {softmax};
+        \node (output) [right of=softmax, node distance=3cm] {$P[w|w_{i-1},\dots,w_{i-n+1}]$};
+        
+        % Edges
+        \draw[->] (input) -- (E);
+        \draw[->] (E) -- (concat);
+        \draw[->] (concat) -- node[above] {$\in\mathbb{R}^{(n-1)d}$} (W1);
+        \draw[->] (W1) -- (sigma);
+        \draw[->] (sigma) |- +(0,-1) -| node[above] {$\in\mathbb{R}^h$} (W2);
+        \draw[->] (W2) -- node[above] {logits $\in\mathbb{R}^|V|$} (softmax);
+        \draw[->] (softmax) -- (output);
+    \end{tikzpicture}
+    \caption{Neural Language Model Architecture}
+    \label{fig:neural_language_model}
+\end{figure}
+
+This model is a significant improvement over the n-gram model:
+while we had $O(|V|^n)$ parameters in the n-gram model, we have $O(|V|nd+hd)$ parameters in the FF model.
+
+The problem that we still have is that the $n$ parameter is fixed so
+if we have a context bigger than $n$ we cannot use this model.

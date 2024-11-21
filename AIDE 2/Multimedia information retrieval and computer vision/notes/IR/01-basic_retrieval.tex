@@ -1,0 +1,55 @@
+\subsection{Basic Retrieval}
+\label{sec:basic_retrieval}
+
+An IR system resembles and has evolved from a library.
+Now they are Google, DuckDuckGo, Bing, etc.
+Whenever we have a "search bar" we are using an IR system.
+Also image, audio, legal and medical retrieval systems exist.
+
+Imagine searching for a word in a book, it would be
+slow enough with $O(100)$ pages, imagine with $O(1B)$ pages.
+Linear search is not feasible, that's why we need IR systems.
+
+The procedure of retrieving relevant information from data sources
+which were not originally designed for information access is called
+\textbf{Information Retrieval}.
+
+An IR system is assessed by its efficiency (time to retrieve) and
+effectiveness (relevance of the retrieved information).
+
+The kind of information that IR systems handle can be any kind
+of text (txt, pdf, word files, forum posts, etc.), images, audio,
+video, etc.
+
+Why can't we use a database system for IR? Because databases are
+designed for structured data specifically for relations and entities.
+A well defined structure and semantics is required for databases.
+If some values are Null we encounter problems like performance 
+issues etc.
+In text files we don't have a well defined structure, we have
+unstructured data.
+
+An IR system aims to rank documents by relevance to a query.
+The relevance is a score assigned to a document basend on its
+content related to the query.
+Often exact matches are not enough to determine relevance
+because they are too strict. We need to consider the properties
+of natural language.
+
+We have to deal with "fuzzyness" in IR systems.
+Most of the stuff in IR is an heuristic not an exact algorithm.
+
+What makes a document relevant?
+\begin{itemize}
+    \item it contains the query terms?
+    \item it contains all of the query terms?
+    \item it contains the query terms many times?
+    \item it contains the query terms many times in a short document?
+    \item it contains the query terms in close proximity?
+    \item \dots
+\end{itemize}
+
+In the typical scenario of an IR we have a user that issues a query,
+some kind of question. The system provides an answer and then the user
+can provide an assessment of the answer. The aim of a search engineer
+is to make this process automatic.

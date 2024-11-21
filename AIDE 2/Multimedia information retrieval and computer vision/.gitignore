@@ -1,0 +1,9 @@
+.venv/
+lab/
+data/
+CVProject/
+MIRProject/
+
+notes/.aux/*
+
+!notes/.aux/main.pdf

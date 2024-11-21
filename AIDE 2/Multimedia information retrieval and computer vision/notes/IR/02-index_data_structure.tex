@@ -1,0 +1,83 @@
+\subsection{Index Data Structure}
+\label{sec:index_data_structure}
+
+To find a query result in a big corpora of documents is
+no easy task, with grep we could achieve $O(n)$ time complexity
+but this does not scale well.
+
+\textbf{Term-document incidence matrix} is a matrix where rows are
+terms and columns are documents. The matrix is filled with
+1s and 0s, 1 if the term is in the document, 0 otherwise.
+\textbf{Incidence vectors} are the rows of the matrix.
+to find an AND query we can simply multiply (bitwise AND) 
+the vectors and find the result. To find a NOT query we can
+negate the vector and then multiply.
+The problem with this approach is the size of the matrix,
+it grows with the number of terms and documents $O(n*m)$.
+The \textbf{term-document incidence matrix} is extremely sparse
+(a lot of 0s) so we can only store the positions of the 1s.
+Doing this we get an \textbf{inverted index}.
+
+\textbf{Inverted indexes} are data structures designed to support search.
+The performance of an index can be measured by:
+\begin{itemize}
+    \item time
+    \item space
+    \item storage
+    \item latency
+    \item throughput
+\end{itemize}
+An inverted index is a list for each word a list of documents
+where the word appears. It's essentially the inverse of a
+classical index (who would have thought?).
+
+\textbf{Inverted index} is composed of multiple composed data structures:
+\begin{itemize}
+    \item Dictionary: a list of all the terms in the collection.
+    \item \textbf{Document IDs}: a list of all the documents in the collection
+    associated to a positive integer.
+    \item \textbf{Term IDs}: a list of all the terms in the dictionary
+    associated to a positive integer.
+    \item \textbf{Posting lists}: each term is associated with a list of documents 
+    where the term appears and other information. The list is sorted
+    by document ID. These lists are stored sequentially in a file and we store the
+    offset of the start of the list for each term.
+    If we have different information for each term-document pair it's better 
+    to store the information in separate files.
+    \item \textbf{Lexicon}: the string representation and some statistics of the terms.
+    \item \textbf{Document index}: contains information on the single documents like
+    their length. The actual contents of the document are not needed until the very
+    last step of the retrieval process.
+    \item Collection statistics: contains information on the whole collection.
+    \item Direct index: an index mapping documents to terms and their frequencies.
+    This is not frequently used.
+\end{itemize}
+\textbf{Bold} items are the mandatory ones.
+
+With a simple posting list no ranking is possible, we need to
+add some information to the list. We can add the term frequency
+in the document, the position of the term etc. We can use
+these additional information to rank the documents.
+Frequencies are actually counts not real frequencies.
+
+What is a "term" for the purpose of indexing?
+Any string between two separating symbols. In this case we are
+referring to \textbf{full-text indexing}.
+Another approach is \textbf{key-word indexing} where we index
+only the most important words in a document. These words are
+extracted from a list.
+\textbf{Key-word indexing} allows for a more compact index because
+there will be less \textbf{posting lists} and also they will be shorter.
+We can also use \textbf{phrase indexing} where we index the whole
+phrase instead of single words. In this case we use a list of 
+key phrases.
+We can also use \textbf{n-gram indexing} where we index some n-length
+word sequences. This makes the index and lexicon significantly longer
+but \textbf{posting lists} are shorter.
+
+What do we put in a posting?
+The minimum is the document ID. We can also put the term frequency (count),
+the impact score (how important the term is in the document) or even
+a list of positions of the term in the document.
+
+NEVER store document IDs and frequencies in the same file.

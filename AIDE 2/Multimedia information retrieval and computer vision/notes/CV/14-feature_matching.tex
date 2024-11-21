@@ -1,0 +1,49 @@
+\subsection{Feature matching}
+\label{sec:feature_matching}
+
+Onc we have detected and described keypoints, we have a bunch of dense vectors in a high-dimensional space.
+We call those vectors \textbf{embeddings}.
+
+Once we have embeddings for all of our dataset, and an embedding for a query image, we want to find the closest
+embeddings to the query image. Closeness can be either a distance or an angle.
+This problem is called \textbf{nearest neighbor search}.
+
+The easiest way to do this is the \textbf{brute force search}, where we test one by one all the embeddings in the dataset.
+This algorithm has many problems:
+\begin{itemize}
+    \item It only outputs one result, not taking into account the rest of the dataset and any possible noise.
+    \item It always outputs a result, even if the query image is not related to the dataset.
+    \item It is slooooowwwwww.
+\end{itemize}
+
+We define a metric $NNDR(\phi_a, \phi_b^1, \phi_b^2)=\frac{d(\phi_a, \phi_b^1)}{d(\phi_a, \phi_b^2)}$ to use as threshold,
+we do not output anything if NNDR is bigger than 0.8.
+
+A greedy optimization is to use a bounding box to discard embeddings that are too far away from the query image (\textbf{KD-tree}).
+The problem is that with the number of dimensions the number of intersections grows exponentially.
+
+A better approach is to use \textbf{locality sensitive hashing (LSH)}.
+In this approach we use hashing functions that have locality preserving properties
+so that close points are hashed to close hash values.
+LSH gives an approximate solution to the NNS problem.
+
+\subsubsection{Vector quantization}
+
+Also this approach is really slow and does not scale well with many items.
+
+We use a technique called \textbf{vector quantization}.
+Given our embeddings $\Psi=\{\psi_1, \dots, \psi_n\}$ and a set of vectors in the same 
+space $C=\{\mu_1, \dots, \mu_k\}$ called \textbf{codebook},
+we define a \textbf{vector quantizer} as a function $q_C:\Phi\rightarrow C | q_C(\phi)=argmin_{\mu\in C}||\psi-\mu||$
+
+We define a tasselation of the space called \textbf{Voronoi tasselation} such that
+each cell is $V_i={x\in\mathbb{R}|q_C(x)=\mu_i}$.
+
+We want to use the optimal codebook that minimizes the reconstruction error $RE(C)=\sum_{i=1}^{n}||\phi_i-q_C(\phi_i)||$.
+The problem is then formulated as $C^*=argmin_CRE(c)$.
+
+We can use K-means to solve this problem.
+
+To actually use the system we then translate each vector in $C^*$ in its index,
+we call this index the \textbf{visual term-id}.
+Then we can use the usual inverted index.

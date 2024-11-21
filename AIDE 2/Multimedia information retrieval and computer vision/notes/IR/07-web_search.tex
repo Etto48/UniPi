@@ -1,0 +1,121 @@
+\subsection{Web search}
+\label{sec:web_search}
+
+The types of queries that are issued to a web search engine
+are:
+\begin{itemize}
+    \item \textbf{Navigational queries}: to reach a particular site
+    that the user has in mind. They are the 20\% of the queries.
+    \item \textbf{Informational queries}: to find information 
+    assumed to be present on one or more webpages. They are
+    the 48\% of the queries.
+    \item \textbf{Transactional queries}: to reach a site where
+    further interaction will happen. They are the 30\% of the
+    queries.
+\end{itemize}
+
+Google has at least 30 trillion pages in the indexes of its search
+engine.
+
+What's relevant in a web search depends also on time. The meaning
+of a query can change over time, take for example "president of
+the united states" or "world cup".
+
+Query volume and type also changes in different locations, the
+meaning of a query can change also depending on the location.
+
+The search engine has to personalise the query depending on the
+user's context. Users have different interests, which are
+reflected in their short and long-term search history.
+Queries cold be ambiguios for the search engine, 
+personalisation signals help to resolve that.
+
+In a web search engine, the query also has the user context
+in it.
+So the goal is to estimate $P(r|d,x)$, where $r$ is the relevance
+of the document $d$ to the query and context $x$.
+
+We need to find features that are correlated with relevance.
+Most of the web is junk so we need to isolate the relevant
+information.
+
+In web search we have hyperlinks, these can be used to extract
+information about a page.
+The anchor text of a hyperlink is a good indicator of the
+content of the page it points to.
+The number of hyperlinks to a page is also a good indicator
+of the importance of the page.
+A hyperlink is a transition of authority on a certain topic from
+a page to another.
+
+The first search engines used the number of hyperlinks to a page
+to rank the page, this does not depend on the query but only
+on the page. This system is susceptible to link spamming.
+The \textbf{PageRank} algorithm simulates a very large number 
+of users that navigates the web by following hyperlinks.
+At each time step, the user jumps to a random page with
+a probability $1/d$ where $d$ is the number of pages linked
+from the current page.
+
+To compute the PageRank we first need the adjacency matrix.
+We transform the adjacency matrix into a transition matrix
+by dividing each row by the sum of its elements.
+Then we transpose the matrix and we get a Markov chain.
+Each element of the matrix is $P(j|i)$ (the probability of
+moving to page $j$ being in page $i$).
+THe Markov chain is ergodic so there is no recurrent visit
+pattern.
+For any ergodic Markov chain there is a unique long-term
+proability distribution.
+To find this distribution we need to find $Mx=x$ (eigenvector)
+where $M$ is the Markov chain matrix and $x$ is the probability
+distribution.
+To avoid dead ends, PageRank introduces the teleportation
+computation: at each time step the user can jump with
+small probability to a random page.
+To get the Google matrix $G$ we have to add the teleportation
+computation to the Markov chain matrix.
+\[
+    G = (1-\lambda)M + \lambda 1/n
+\]
+Where $n$ is the number of pages.
+We can prove that the Google matrix is an ergodic Markov chain.
+Nowadays the PageRank is not taken into account (too much) by
+Google, but it's still a good indicator of the importance of
+a page.
+
+To get the data for the PageRank we need to crawl the web.
+A crawler is a program that exploits the connected structure
+of the web to find new pages (We assume the web to be connected).
+
+A crawler has a priority queue called frontier.
+We start from a set of well-connected pages (seed pages).
+We consume the frontier by fetching a page, parsing it and
+extracting the links. We add the links to the frontier.
+The problem is that the frontier can grow very fast.
+The process must be resistant to errors and run on many machines.
+How many times we should re-crawl a page? We have to balance 
+freshness and politeness. We have to skip duplicates and
+near-duplicates.
+We have 3 sets of pages: 
+\begin{itemize}
+    \item \textbf{Downloaded}: the pages that we have downloaded.
+    \item \textbf{Discovered}: the pages that were discovered from
+    the downloaded pages.
+    \item \textbf{Undiscovered}: the pages that are not yet
+    discovered by the crawler.
+\end{itemize}
+
+The frontier has to be sorted by a priority function.
+We have also to implement an url filter to avoid crawling
+the same page multiple times.
+We need a content filter to avoid duplicates and near-duplicates.
+Nutch is a popular distributed open-source crawler.
+
+To make the web search feasible we have to distribute it.
+We can distribute the index by term or by document.
+With the term distribution we have to use multiple servers
+for a single query.
+With the document distribution each server is responsible
+for a subset of the documents.
+We use map-reduce to process the query and merge the results.

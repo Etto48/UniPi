@@ -1,0 +1,101 @@
+\subsection{Machine learning for ranking}
+\label{sec:machine_learning_ranking}
+
+Can we use machine learning to rank documents? (yes)
+The simplest model is a linear regressor.
+Actually machine learning for ranking works really good.
+In 2008 Google was already using 200 features to rank documents.
+
+Machine learning models are basically one of two kinds:
+\begin{itemize}
+    \item \textbf{Generative models}: they generate data.
+    They work well with low number of training examples.
+    \item \textbf{Discriminative models}: they discriminate between
+    classes. They work better with a lot of training examples.
+\end{itemize}
+
+Regression is not a good model for ranking, because we do not
+care about the value of the score, but only of the order of the
+documents.
+
+We want specifically designed ML techniques for ranking documents
+w.r.t. a query (learning to rank).
+
+To train such models we will of course need training data.
+Also clickthrough data can be really helpful to generate more
+training data.
+
+Whatever model we use, it will be slower than the simple
+BM25 algorithm.
+
+We cannot process the whole dataset, so we build what's called
+a cascade architecture. Actually BM25 is already a cascade
+architecture: we first filter the documents with simple
+boolean inclusive retrieval and then we rank the documents
+with BM25.
+
+We can re-rank the top $k$ documents that are the output of
+BM25 with a machine learning model, of course the old score
+can be a feature of the model.
+Each step of the cascade can return less and less documents,
+so we can use more complex models.
+
+It's important that every step of the cascade is effective
+because if we remove important documents at the first step
+the second step cannot fix that. So we focus on recall-based
+metrics to avoid losing good documents even if they are in a
+suboptimal order.
+
+To train a ML model we need a training set of queries and
+documents with relevance judgements.
+For each document we need a feature vector, and also
+the query must be represented as a feature vector.
+
+We have multiple features to feed into the model, they can be:
+\begin{itemize}
+    \item \textbf{Query-document features}: they depend on the
+    query-document pair.
+    \item \textbf{Query features}: they depend only on the query.
+    \item \textbf{Document features}: they depend only on the
+    document.
+\end{itemize}
+
+To train the model we need to:
+\begin{itemize}
+    \item Sample the top documents from the BM25 output.
+    \item Compute the features
+    \item Train the model
+\end{itemize}
+
+During inference we need to:
+\begin{itemize}
+    \item Sample the top documents from the BM25 output.
+    \item Compute the features
+    \item Apply the model and re-rank the documents
+\end{itemize}
+
+We will need a training-set and also a test-set
+(optionally also a validation-set).
+
+We need a loss function to train the model.
+We have different types of loss functions:
+\begin{itemize}
+    \item \textbf{Point-wise loss}: evaluate one single output.
+    \item \textbf{Pair-wise loss}: evaluate pairs of outputs.
+    \item \textbf{List-wise loss}: evaluate a whole list of
+    outputs.
+\end{itemize}
+
+The models that we can use are:
+\begin{itemize}
+    \item \textbf{Linear models}: they are simple and only use
+    a vector of weights. They need the gradient of the loss
+    function.
+    \item \textbf{Tree-based models}: a random forest is a good
+    model to create contributions that will be summed up to
+    get the final score. We can use LambdaMART and gradient-boosted
+    regression trees.
+\end{itemize}
+
+We can also use bags of models (ensamble methods) to get better
+results.

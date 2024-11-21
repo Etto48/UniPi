@@ -1,0 +1,67 @@
+\subsection{Convolutional Neural Networks}
+\label{sec:convolutional_neural_networks}
+
+To be effective in tasks like object recognition, image classification, semantic segmentation and object localization
+we need to use a \textbf{Convolutional Neural Network (CNN)}.
+
+\subsubsection{Difference between convolution and cross-correlation}
+
+In a neural network a convolutional layer is a generalization of the convolution:
+\[
+    f*g:\mathbb{Z}^d->\mathbb{R}^{d\ge1}
+\]\[
+    f[u]*g[u]=\sum_{v\in\mathbb{Z}^d}f[v]g[u-v]
+\]
+
+The cross-correlation is defined as:
+\[
+    f \circledast g:\mathbb{Z}^d->\mathbb{R}^{d\ge1}
+\]\[
+    f[u] \circledast g[u]=\sum_{v\in\mathbb{Z}^d}f[v]g[v+u]
+\]
+
+We see that the only difference is the sign of the shift.
+We can prove that
+\[
+    f[u] \circledast g[u] = f[-u] * g[u]
+\]
+by changing the variable $u$ to $-w$.
+With symmetric filters the two operations are equivalent.
+
+\subsubsection{From MLP to CNN}
+
+Why do we need CNNs? If we use a fully connected layer
+it must have a number of parameters equal to
+$(I+1) \times O$ where $I$ is the input size
+and $O$ is the output size (weight matrix + bias).
+With an average image of 1024x1024 pixels we would have
+$I=1048576$ and with any non trivial $O$ we get a huge amount
+of parameters.
+
+We have to apply the principles used in image processing to 
+make the network more efficient.
+Let's call the weights of the layer $W$, the input $f$, the output $z$ and the bias $b$.
+In a linear layer we have:
+\[
+    z[x,y]=\sum_{k}\sum_{l}W[x,y,k,l]f[k,l]+b[x,y]
+\]
+We can rewrite this as:
+\[
+    z[x,y]=\sum_{u}\sum_{v}\hat{W}[x,y,u,v]f[x+u,y+v]+b[x,y]
+\]
+
+\begin{itemize}
+    \item \textbf{Translation invariance}: $\hat{W}[x,y,u,v]=\hat{W}[u,v]$
+    \item \textbf{Spatial locality}: A pixel at $(x,y)$ has to depend only on
+    pixels near it. We only take into account a patch $P = D\times D$ around the pixel.
+    $z[x,y]=\sum_{u,v\in P}\hat{W}[u,v]f[x+u,y+v]+b[x,y]$
+\end{itemize}
+The resulting formula needs only $D^2+1$ parameters and
+is actually a convolutional layer.
+
+When we have multiple channels we need a 3D tensor instead of a 2D matrix.
+On GPU the performance is not affected significantly by the number of channels.
+The new formula is:
+\[
+    z[c_0,x,y]=\sum_c\hat{W}[c_0,c,x,y]\circledast f[c,x,y]+b[c_0,c]
+\]

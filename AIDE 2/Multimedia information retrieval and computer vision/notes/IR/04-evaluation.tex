@@ -1,0 +1,183 @@
+\subsection{Evaluation}
+\label{sec:evaluation}
+
+There are two aspects to measure about an IR system: effectiveness and efficiency.
+Efficiency is easy to measure, it is the time it takes to perform a query.
+Effectiveness is harder to measure, it is related to user satisfaction.
+We need a way to measure the relevance of the results of a query for
+a user.
+There are three elements to consider in the evaluation of an IR system:
+\begin{itemize}
+    \item \textbf{Benchmark collection} collection.
+    \item \textbf{Benchmark queries} collection.
+    \item \textbf{Assessment} of relevance for each query and document
+    For each query-document pair we need to know if the document is relevant
+    to the query or not. (qrels)
+\end{itemize}
+
+The metric will have a maximum value of 1, that represents a perfect system and
+cannot be reached in practice.
+
+Relevance assessment can be done in two ways:
+\begin{itemize}
+    \item \textbf{Binary assessment} the document is either relevant or not.
+    \item \textbf{Graded assessment} the document is assigned a score.
+    Graded assessment is more informative but also more difficult to obtain.
+\end{itemize}
+
+Assessments are extremely expensive to obtain, one possible solution is crowdsourcing,
+this can lead to noisy data because the assessors are not trained.
+
+Relevance assessments are the most important part of the IR system development process
+because if we don't know how good the system performs we cannot improve it.
+
+To create a benchmark query collection we can use a query log, this is easier to obtain
+with web search engines.
+
+When query logs cannot be used we need an expert to create the queries.
+
+In order to make experimentation sound we need the benchmark and assessments to be
+publicly available.
+
+There exists several benchmarks for IR systems, the Text REtrieval Conference (TREC)
+makes them available.
+
+There is a tool called \texttt{trec\_eval} that is the only tool that should be used
+to evaluate IR systems.
+
+To evaluate an IR system we take the \textbf{topic} as input, create a \textbf{run}
+where we get the top-k documents for each topic and then we get the \textbf{run}
+assessed (with the qrels) and we use this to get the evaluation metric.
+
+A \textbf{topic} is composed of
+\begin{itemize}
+    \item \textbf{Title}: a brief description of the topic, can be used as a query.
+    \item \textbf{Description}: a more detailed description of the topic.
+    \item \textbf{Narrative}: a description of the relevant documents used to asses the
+    relevance of the results.
+\end{itemize}
+
+Usually an assessment is done by pooling:
+\begin{itemize}
+    \item We select some systems to run the queries.
+    \item We get the top-k ($50<k<200$) documents for each query.
+    \item We merge the results of the systems.
+    \item We remove the duplicates.
+    \item We present the documents in random order to the assessors.
+\end{itemize}
+
+When creating a \textbf{run} we need to save both the rank and the score of the document,
+the score is used to evaluate how the system handles ties.
+
+\subsubsection{Set based metrics}
+\label{sec:set_based_metrics}
+
+With non ranked results we can use set-based metrics like precision, 
+recall and F1-score.
+In a expert search we want a high recall, precision is not as important.
+
+We can compute the average with arithmetic mean or geometric mean.
+
+With ratios with the same numerator it's better to use the geometric mean.
+With ratios with the same denominator it's better to use the arithmetic mean.
+
+\subsubsection{Rank based metrics}
+\label{sec:rank_based_metrics}
+
+With ranked results it's better to use rank based metrics.
+The most common rank based metrics are:
+\begin{itemize}
+    \item \textbf{Precision at k} $P@k$ is the proportion of relevant documents in the top-k.
+    With lower k we usually get higher precision.
+    \item \textbf{Recall at k} $R@k$ is the proportion of relevant documents in the top-k.
+    With higher k we get lower recall.
+    \item \textbf{Mean Average Precision} $MAP$ is the average of the precision 
+    at each relevant document.
+\end{itemize}
+
+We can compute the Precision-Recall curve by plotting the precision at each recall level.
+We can replace the curves with the maximum seen so far to get the interpolated precision 
+and recall. This representation is difficult to interpret.
+
+To compute the $MAP$ we compute the rank of each relevant document $K_i$ and then we compute
+Whenever we encounter a relevant document we compute the precision at that point $P@K_i$ and
+then we compute the average of the precision at each relevant document. Usually we compute
+the $MAP$ at cutoff 1000. (So technically it's $MAP@1000$)
+
+It's easy to prove that $MAP$ is equivalent to the area under the Precision-Recall curve.
+
+If we want to use graded relevance assessment we can use the discounted cumulative gain ($DCG$).
+\[
+    DCG@k = 
+    \begin{cases}
+        \sum_{i=1}^k r_i & \text{if } k < b \\
+        DCG@b(k-1)+r_k/\log_b(k) & \text{if } k \geq b
+    \end{cases}
+    = \sum_{i=1}^k\frac{r_i}{max(1,\log_bi)}
+\]
+
+In this formula $b=2$ is an impatient user, $b=10$ is a patient user.
+Usually we use $b=2$.
+
+Unfortunately $DCG$ is not bounded, it goes from 0 to $\infty$.
+
+This metric introduced a \textbf{user model}. Any rank based evaluation metric assumes
+a user model.
+
+All models are wrong, but some are useful.
+
+To solve the problem of the unboundedness of $DCG$ we can use the normalized discounted
+cumulative gain ($nDCG$).
+\[
+    nDCG@k = \frac{DCG@k}{IDCG@k}
+\]
+
+Where $IDCG@k$ is the ideal discounted cumulative gain at cutoff $k$. This is the
+highest possible $DCG$ that can be obtained for a given query.
+We can compute the $IDCG$ by sorting the documents by relevance and then computing the $DCG$.
+
+For our systems we can expect $nDCG$ to be between 0.1 and 0.2.
+
+Another metric is the rank-biased precision ($RBP$).
+In this user model, the user will continue looking at the results with a probability $p$.
+Usually we use $p=0.5$ for impatient users.
+
+\[
+    RBP@k = (1-p)\sum_{i=1}^kp^{i-1}r_i=(1-p)\sum_{k\in R}p^{k-1}
+\]
+
+Another metric that is not very useful but works well with a single relevant document is
+the mean reciprocal rank ($MRR$).
+
+\[
+    MRR = max_{i\in R} \frac{1}{i}
+\]
+
+The max is used only if we have multiple relevant documents, otherwise it's only
+$\frac{1}{i}$.
+
+This metric is very sensitive to variations in the top ranks.
+
+\subsubsection{Statistical evaluation}
+\label{sec:statistical_evaluation}
+
+In theory we should use not a sample of queries but all the queries possible
+on a finite and predefined set of documents. Because Q (the set of queries) is
+a random variable we have to compute the expected value of the metric.
+
+In practice this is not feasible because the number of queries is too large
+and we do not have the ground truth for all the queries and documents.
+We use a subset of the queries and compute the average metric.
+
+Once we have the average metric, can we conclude that a system is better than
+another system?
+Obviously not, the only way to do this would be with the ideal set of all 
+possible queries.
+To assert that a system is better than another we need to use statistical tests.
+This tests can tell us if the difference between two systems is significant or not
+and with what confidence.
+
+The most common statistical test is the t-test.
+Another test that is simpler is the Wilcoxon signed-rank test.
+
+You should fix the p-value before running the test, usually it's 0.05.

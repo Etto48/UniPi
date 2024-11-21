@@ -1,0 +1,57 @@
+\subsection{CNN architectures}
+\label{sec:cnn_architectures}
+
+With more layers the computational cost increases, we need to find some techniques to reduce it.
+One of those is \textbf{striding}: instead of computing the convolution at every pixel, we skip some pixels.
+A priori in convolutional networks there is no concept of scale, to introduce it we use \textbf{pooling}.
+Pooling is a non trainable transformation that reduces the size of the input.
+
+The pooling operation divides the input into patches and applies a function to each patch.
+The most common pooling function is the max pooling, that takes the maximum value for each patch.
+Another pooling function is the average pooling, that takes the average value for each patch.
+
+Patches can overlap or not, and be as complex as we want.
+Pooling is always a down-sampling operation.
+
+With smaller images convolutions take less time to compute.
+
+In computer vision we have 3 types of tasks:
+
+\begin{itemize}
+    \item \textbf{Image classification}: We have an image and we want to know what's in it.
+    \item \textbf{Object detection}: We have an image and we want to know where the objects are. 
+    For example \textbf{You Only Look Once (YOLO)} is a network that does object detection.
+    It divides the image into a grid of cells (patches) and for each cell detects if there is an object and of what class.
+    \item \textbf{Semantic segmentation}: We have an image and we want to know what's in it and where.
+    We want to do pixel-wise object detection. First we downsample the image to classify it then we use 
+    upsampling to get back to the original image size with each pixel classified.
+\end{itemize}
+
+\subsubsection{LeNet}
+\label{sec:lenet}
+
+This network was used for digit recognition (MNIST dataset).
+
+\begin{itemize}
+    \item Input: $32\times32$ pixels ($1024$ pixels)
+    \item Convolutional layer: $5\times5$ kernel, $6$ filters, $1$ stride
+    \item ReLU activation with input size $28\times28\times6$
+    \item Pooling layer: $2\times2$ kernel, $2$ stride
+    \item Convolutional layer: $5\times5$ kernel, $16$ filters, $1$ stride
+    \item ReLU activation with input size $10\times10\times16$
+    \item Pooling layer: $2\times2$ kernel, $2$ stride
+    \item Flatten layer that outpus a dense embedding of size $400$
+    \item MLP that does the required task
+\end{itemize}
+
+Why bother with all these convolutional layer and not stop with 2 linear layers?
+It's true that with two linear layers we can approximate any function, but the number of parameters
+grows exponentially with the complexity of the function.
+
+A manifold in two dimensions is a curve, in three dimensions is a surface, in four dimensions is a volume etc.
+It's a subspace of the input space where the valid images lie.
+We say that a valid image can be represented on a low dimensional manifold because only a small subset of all possible images
+are valid.
+
+
+

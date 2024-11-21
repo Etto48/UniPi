@@ -1,0 +1,92 @@
+\subsection{Relevance feedback}
+\label{sec:relevance_feedback}
+
+The information need is the cause of the query
+that the user issues to the IR system.
+This need can be categorised with a variety of
+dimensions: number of relevant documents, type 
+of information needed, the type of the task
+that led to the need.
+A query can represent different information needs
+that may require different algorithms to produce
+the best rankings.
+A query can be a poor representation of the
+information need. Users may found difficult to
+expresses the information need, they may be
+encouraged to issue short queries, also the
+same query string may represent different
+information needs.
+
+It's usually difficult to formulate a good query
+without knowing the collection and the retrieval
+environment. Usually the user has to issue a
+query, examine the results and then reformulate
+the query. IR is usually interactive and iterative.
+
+Interaction with the system occurs during the
+formulation and reformulation of the query and 
+during the examination of the results.
+Users can't change the ranking algorithm but can 
+change the results with their interaction.
+
+We can represent both the query and the documents as
+vectors. Relevant documents have similar vectors to
+the query. To make the vectors more similar we can
+modify the weights of the terms in the query,
+usually positive feedback is used to increase the
+weights of the terms in the query that are present
+in relevant documents. Sometimes negative
+feedback is used to decrease the weights of the
+terms in the query that are present in non-relevant
+documents. We can also remove the terms that are
+present only in non-relevant documents.
+
+The optimal query maximizes the difference between
+the average vector representing the relevant
+documents and the average vector representing the
+non-relevant documents. The Rocchio algorithm
+modifies the query vector by adding a linear
+combination of the vectors representing the
+relevant and non-relevant documents.
+\[
+    \vec{q'}=\alpha\vec{q}+\beta\frac{1}{|D^+|}\sum_{\vec{d}\in D^+}\vec{d}
+        -\gamma\frac{1}{|D^-|}\sum_{\vec{d}\in D^-}\vec{d}
+\]
+
+Typically $\alpha=8$, $\beta=18$ and $\gamma=4$.
+Query terms with negative weights are removed.
+Typically only the top $k$ terms with highest weights
+in the relevant documents are added to the query.
+
+The relevance feedback generally improves the performance
+(recall and precision) of the IR system. It's most useful for
+increasing recall in situations where the recall is important.
+
+Positive feedback is more valuable than negative feedback.
+That's why $\gamma<\beta$. Many systems set $\gamma=0$.
+
+Users in general are reluctant to provide explicit feedback.
+
+\textbf{Pseudo-relevance feedback} is a technique that
+tries to estimate what document the users would have
+marked as relevant. We assume that the top $m$ documents
+are relevant and use them to reformulate the query.
+
+In the expanded query the terms are not re-weighted, therefore
+we need to re-weight the query terms, including the expanded ones.
+
+This algorithm suffers form \textbf{query drift}: this problem
+arises when documents used for RF contain few or no relevant
+documents. The algorithm will add terms that are poor
+at detecting relevance and the performance will decrease.
+
+\textbf{Pseudo-relevance feedback} is a technique that
+will improve some queries but also harm others.
+
+We can expand the query also with other techniques, like
+the \textbf{thesaurus-based expansion} that performs expansion
+by adding synonyms of the terms in the query.
+We can weight the new terms with less weight than the
+original terms.
+This technique generally increases recall but can
+decrease precision.

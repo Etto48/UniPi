@@ -1,0 +1,220 @@
+\subsection{Convolution}
+\label{sec:convolution}
+
+When we compute the output of an LSI filter we will need to compute
+the convolution of the input image with the filter.
+Because the convolution is written as
+\[
+    f[x,y]*g[x,y]=\sum_{i=-\infty}^{+\infty}\sum_{j=-\infty}^{+\infty}f[i,j]g[x-i,y-j]
+\]
+the convolution filter needs to be flipped before applying it to the input image.
+We can denote the elementwise multiplication of two matrices as $\odot$.
+
+Usually we write an image as an infinite matrix to simplify the notation.
+In practice the actual image is limited in a finite box of $I_h\times I_w$ pixels
+and the values outside this box are set to zero.
+
+When we actually want to compute the convolution of an image
+what happens on the pixels on the border of the image?
+While we the whole filter stays inside the image we do not have any problem.
+If the filter is centered on a border pixel (or is in any ways partially outside the image)
+we start to have problems.
+
+If we drop the values obtained with the filter outside the image with a filter of 
+size $k\times k$ we will have an output image of size 
+$(I_k-\lfloor\frac{k}{2}\rfloor)\times(I_w-\lfloor\frac{k}{2}\rfloor)$.
+So for even the smallest filters of size $3\times 3$ we will lose a border of $1$ pixel.
+
+To avoid losing a lot of pixels we can use a technique called \textbf{padding}.
+Padding can be:
+\begin{itemize}
+    \item \textbf{Constant padding}: we add a border of constant values to the image.
+    This solution downgrades the quality of the border pixels.
+    \item \textbf{Extended padding}: we use the same color of the border pixel to fill the border.
+    This is not a good solution for large filters.
+    \item \textbf{Mirror padding}: we mirror the image to fill the border.
+    This solves problems with large filters.
+\end{itemize}
+
+One important class of filters are the so-called \textbf{separable filters}.
+A filter $h[x,y]\in\mathbb{Z}^{n\times m}$ is separable if it can be written as:
+\[
+    h[x,y]=h_x[x]*h_y[y]
+\]
+where $h_x[x]\in\mathbb{Z}^n$ and $h_y[y]\in\mathbb{Z}^m$.
+We can write it also as an outer product:
+\[
+    h[x,y]=(h_x h_y^T)[x,y]
+\]
+A very important result is that if a filter is separable it can
+be applied as two 1D convolutions instead of a 2D convolution.
+The computational complexity of a generic 2D convolution is $O(nm)$
+while the complexity of two 1D convolutions is $O(n+m)$.
+For big filters this is a significant speedup.
+
+\subsubsection{Gradient}
+\label{sec:gradient}
+
+We can write (for the taylor expansion):
+\[
+    \begin{cases}
+        f[x-h]=f[x]-hf_x[x] \\
+        f[x+h]=f[x]+hf_x[x]
+    \end{cases}
+\]
+We set $h=1$ because it's the smallest interval in $\mathbb{Z}$.
+We can calculate the derivative as:
+\[
+    \begin{cases}
+        f[x]-f[x-1]=f_x[x] \\
+        f[x+1]-f[x]=f_x[x]
+    \end{cases} \\
+\]
+So the central derivative is:
+\[
+    f_x[x]=1/2(f[x+1]-f[x-1])
+\]
+the forward derivative is:
+\[
+    f_x[x]=f[x+1]-f[x]
+\]
+and the backward derivative is:
+\[
+    f_x[x]=f[x]-f[x-1]
+\]
+
+This is the same as the LSI filter
+(remember to flip the filter)
+for the central derivative:
+\[
+    h_x[x]=\begin{bmatrix}
+        1/2 & 0 & -1/2
+    \end{bmatrix}
+\]
+for the forward derivative:
+\[
+    h_x[x]=\begin{bmatrix}
+        1 & -1 & 0
+    \end{bmatrix}
+\]
+and for the backward derivative:
+\[
+    h_x[x]=\begin{bmatrix}
+        0 & 1 & -1
+    \end{bmatrix}
+\]
+
+So the gradient can be computed as:
+\[
+    \nabla f[x,y]=f[x,y]*h_x[x]*h_y[y]
+\]
+
+If we want to compute the magnitude of the gradient
+we lose linearity because we have to compute the square root 
+of the sum of the squares:
+\[
+    \nabla f[x,y]=\sqrt{f_x[x,y]^2+f_y[x,y]^2}
+\]
+
+\subsubsection{Laplacian}
+\label{sec:laplacian}
+
+The discrete Laplacian operator is defined as:
+\[
+    \nabla^2 f[x,y]=f_{xx}[x,y]+f_{yy}[x,y]
+\]
+
+The second derivative can be computed as:
+\[
+    f_{xx}[x,y]=\begin{bmatrix}
+        1 & -2 & 1
+    \end{bmatrix} * f[x,y]
+\]
+and
+\[
+    f_{yy}[x,y]=\begin{bmatrix}
+        1 \\
+        -2 \\
+        1
+    \end{bmatrix} * f[x,y]
+\]
+
+If we want to compute the Laplacian we can use the Laplacian filter:
+\[
+    L[x,y]=\begin{bmatrix}
+        1 & -2 & 1 \\
+    \end{bmatrix} * \begin{bmatrix}
+        1 \\
+        -2 \\
+        1
+    \end{bmatrix} = \begin{bmatrix}
+        0 & 1 & 0 \\
+        1 & -4 & 1 \\
+        0 & 1 & 0
+    \end{bmatrix}
+\]
+This filter is important because
+\[
+    \nabla^2 f[x,y]=L[x,y]*f[x,y]
+\]
+
+\subsubsection{Gaussian filter}
+\label{sec:gaussian_filter}
+
+The Gaussian filter in two dimensions is defined as:
+\[
+    g[x,y,\sigma]=ce^{-\frac{x^2+y^2}{2\sigma^2}}
+\]
+Where $c$ is a normalization constant and $\sigma$ is called spread.
+We choose $c$ so that the sum of the filter is $1$.
+If the sum of all the elements of the filter is $1$ it's called a \textbf{smoothing filter}.
+If the sum of all the elements of the filter is $0$ it's called a \textbf{differentiating filter}.
+
+The Gaussian filter is \textbf{rotation-invariant} so nothing changes if we flip the filter.
+The maximal contribution of this filter is always in the center.
+
+How do we design a Gaussian filter?
+We chose a size $k\times k$ and a spread $\sigma$.
+For the moment we ignore the constant $c$.
+We compute the filter as:
+\[
+    \hat{g}[x,y,\sigma]=e^{-\frac{x^2+y^2}{2\sigma^2}}
+\]
+for each $x,y$ in the size of the filter.
+We compute the normalization constant as:
+\[
+    c=\frac{1}{\sum_{x,y}\hat{g}[x,y,\sigma]}
+\]
+
+If we want to have a filter with all integer values we have to rescale $\hat{g}$.
+We multiply all the values by:
+\[
+    \frac{1}{\min_{x,y}\hat{g}[x,y,\sigma]}
+\]
+For a $3\times 3$ filter with $\sigma=0.85$ we have:
+\[
+    g[x,y]=\frac{1}{16}\begin{bmatrix}
+        1 & 2 & 1 \\
+        2 & 4 & 2 \\
+        1 & 2 & 1
+    \end{bmatrix}
+\]
+We can compute the output of the filter as:
+\[
+    f[x,y]*g[x,y]=
+    c\sum_{i=-\infty}^{+\infty}\sum_{j=-\infty}^{+\infty}f[i,j]
+    e^{-\frac{i^2+j^2}{2\sigma^2}}
+\]
+We can factor out half the exponential because the indices are independent:
+\[
+    f[x,y]*g[x,y]=
+    c\sum_{i=-\infty}^{+\infty}(e^{-\frac{i^2}{2\sigma^2}}\sum_{j=-\infty}^{+\infty}f[i,j]e^{-\frac{j^2}{2\sigma^2}})
+\]
+We can rewrite the sum as a convolution:
+\[
+    f[x,y]*g[x,y]=
+    c*g_x[x]*g_y[y]*f[x,y]
+\]
+This means that the Gaussian filter is separable.
+
+~ "Can't you fall in love with the Gaussian filter?"

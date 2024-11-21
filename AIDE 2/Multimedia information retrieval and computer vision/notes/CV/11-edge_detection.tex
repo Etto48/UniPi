@@ -1,0 +1,54 @@
+\subsection{Edge detection}
+\label{sec:edge_detection}
+
+An edge is a region in an image where the intensity changes abruptly.
+A point in an image is an edge point if points in its neighborhood are
+significantly different.
+"Change" makes us think immediately to derivatives.
+
+An edge detection algorithm given an image will output a list of edge points.
+
+A simple edge detection algorithm is a threshold on the gradient.
+The gradient is a vector so we need to compute its magnitude.
+The threshold is needed in order to decide what change is small and what change is big.
+
+In theory this approach works well but in practice it produces too many edge points and also
+needs a parameter.
+
+With the second derivative, we can detect zero-crossings.
+A good way to compute the second order derivative is the Laplacian operator.
+We search for $\nabla^2 f[x,y]=0$.
+
+In the real world we have noise, in this case the derivative will produce
+a lot of zero-crossings.
+
+A moving average filter can be used to smooth the image, but this remove high frequency
+components, including edges.
+
+The solution is to smooth the image with a Gaussian filter.
+This filter is better at preserving edges.
+To do the derivative of a convolution we have to compute $(f[x]*g[x])_x$
+we can rewrite this as $f[x]*g_x[x]$.
+The derivative of the Gaussian filter is a new filter that computes everything we need in one step.
+
+If we compute the derivative of a Gaussian filter we obtain
+\[
+    \nabla g[x,y,\sigma]=-\frac{1}{2\pi\sigma^4}e^{-\frac{x^2+y^2}{2\sigma^2}}\begin{bmatrix}
+        x \\
+        y
+    \end{bmatrix}
+\]
+This two filters are both separable. Because the gaussian is rotation-invariant, we only have
+to compute the two filters in one dimension.
+
+We still have the problem that the gradient is two-dimensional.
+For this reason we will need the Laplacian.
+We compute the Laplacian of the Gaussian filter for the differentiation property. 
+So we get that:
+\[
+    \nabla^2 (f[x,y]*g[x,y,\sigma]) = \nabla^2g[x,y,\sigma]*f[x,y] =
+        L[x,y]*g[x,y,\sigma]*f[x,y]
+\]
+We can easily compute the Laplacian of the Gaussian filter an apply it to the image
+because both the filters are separable and rotation-invariant.
+$L[x,y]*g[x,y,\sigma]$ is called \textbf{Laplacian of Gaussian (LoG)} filter.

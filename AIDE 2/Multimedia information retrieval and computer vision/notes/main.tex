@@ -1,0 +1,41 @@
+\documentclass{article}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\title{Multimedia information retrieval and computer vision\\
+\large Lecture notes}
+\author{Ettore Ricci}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Information retrieval}
+\input{IR/01-basic_retrieval.tex}
+\input{IR/02-index_data_structure.tex}
+\input{IR/03-query_processing.tex}
+\input{IR/04-evaluation.tex}
+\input{IR/05-probabilistic_information_retrieval.tex}
+\input{IR/06-relevance_feedback.tex}
+\input{IR/07-web_search.tex}
+\input{IR/08-machine_learning_ranking.tex}
+\section{Computer vision}
+\input{CV/09-computer_vision_basics.tex}
+\input{CV/10-lsi_filters.tex}
+\input{CV/11-edge_detection.tex}
+\input{CV/12-image_information_retrieval.tex}
+\input{CV/13-feature_description.tex}
+\input{CV/14-feature_matching.tex}
+\input{CV/15-CNN.tex}
+\input{CV/16-CNN_architectures.tex}
+\section{Language models}
+\input{LM/17-language_models.tex}
+\input{LM/18-n_gram_language_models.tex}
+\input{LM/19-ff_language_models.tex}
+
+\end{document}

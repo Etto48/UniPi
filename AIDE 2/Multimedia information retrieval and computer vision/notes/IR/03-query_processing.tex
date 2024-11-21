@@ -1,0 +1,154 @@
+\subsection{Query processing}
+\label{sec:query_processing}
+
+We can process query terms in two ways:
+\begin{itemize}
+    \item Conjunctive (AND)
+    \item Disjunctive (OR)
+\end{itemize}
+
+After processing the query we select what documents to return
+and in what order.
+\begin{itemize}
+    \item \textbf{Boolean retrieval}: returns documents that match the query.
+    \item \textbf{Ranked retrieval}: for each document we compute a score
+    an order the documents by score.
+    We assume that if a term does not appear in the query it gives 0 score.
+\end{itemize}
+
+Boolean retrieval can be useful only for expert users, they know
+what they are looking for and are able to consume all the results.
+It can be used also for applications that can easily consume all the results.
+
+For the general public we need ranked retrieval. In this case the query
+is written in "free text queries", these queries are more similar to
+natural language.
+
+We want to order the results in such a way that the ones that are more
+likely to be useful are ordered first.
+The score function is in the form: $s: Q\times D \rightarrow \mathbb{R}$,
+where $Q$ is the set of queries and $D$ is the set of documents.
+
+\subsubsection{Term at a time}
+\label{sec:term_at_a_time}
+
+For each term that appears in the query we scan the posting list and
+compute the score for each document. We save the score in a table called
+\textbf{accumulator}.
+
+\textbf{Accumulators} are cache friendly and can be easily used to find
+the top $k$ documents.
+
+This technique is not the best with boolean queries.
+
+\subsubsection{Document at a time}
+\label{sec:document_at_a_time}
+
+We open an iterator overy every posting list. We scan the posting lists
+in parallel and because the posting lists are sorted. We compute the 
+\textbf{final score} for a single document ignoring the other documents
+and then we move to the next document.
+In this way we can stop scanning once we found the top $k$ documents.
+
+This method is less cache friendly than the term at a time method but
+is more widely used because it is more efficient.
+
+\subsubsection{Distributed query processing}
+\label{sec:distributed_query_processing}
+
+All queries are sent to a manager machine.
+The manager then sends messages to many index servers.
+Each index server does some portion of the query processing.
+The manager organises the results and returns them to the user.
+
+\subsubsection{Distributed index}
+\label{sec:distributed_index}
+
+We can distribute the index by document or by term.
+Usually we distribute by document and build for every partition
+its own index.
+
+All indices return the top $k$ documents to the manager.
+The manager then selects the top $k$ documents from all the results.
+
+To distribute the system we need also \textit{global} statistics that needs to be
+stored somewhere, the local statistics are not enough.
+
+If we distribute by term the manager has much more to do but we need less computers.
+Also load balancing can be an issue, because a term can be more popular than another.
+
+\subsubsection{Caching}
+\label{sec:caching}
+
+It's important to store a software cache. Query caching can be refreshed
+only once every some months, while term caching has to be refreshed
+more often.
+
+\subsubsection{Compression}
+\label{sec:compression}
+
+Compression is important because it allows to store more data in memory.
+Ideally we want to keep the whole vocabulary in memory and also some posting lists.
+
+The Heap's law says that the size of the vocabulary $M=|V|$ is proportional to
+$M=kT^b$ where $T$ is the number of tokens.
+
+The Zipf's law says that the frequency of a term is inversely proportional to its rank.
+The rank of a term is calculated by sorting the terms by frequency. $cf_i=\alpha/i$ where
+$i$ is the rank.
+
+\subsubsection{Scoring functions}
+\label{sec:scoring_functions}
+
+A common measure is the Jaccard coefficient:
+\[
+    J(A,B) = \frac{|A\cap B|}{|A\cup B|}
+\]
+
+This measure is used to evaluate the overlap between two sets.
+It's always in $[0,1]$.
+
+This measure does not take into account 
+how many times the term appears in the document.
+It does not take into account the rarity of the term, 
+the occurrences and the size of the document.
+
+We can represent documents by \textbf{bag of words} vectors model.
+For each combination of term and document we store the frequency of the term in the document.
+
+\textit{Hans P. Luhn} proposed that the weight of a term should be proportional to
+its absolute frequency in the document.
+
+The term-frequency weight is defined as:
+\[
+    w_{t,d} = 
+    \begin{cases} 
+        1 + \log(tf_{t,d}) & \text{if } tf_{t,d} > 0\\
+        0 & \text{otherwise}
+    \end{cases}
+\]
+
+We should also keep in account the absolute frequency of a word in the collection, because
+more common words are less informative.
+As invented by \textit{Karen Sp\"arck Jones} we should also use the inverse document frequency.
+\[
+    w_{t,d} = 
+    \begin{cases}
+    (1 + \log(tf_{t,d})) \cdot \log\left(\frac{N}{n_t}\right) & \text{if } tf_{t,d} > 0\\
+    0 & \text{otherwise}
+    \end{cases}
+\]
+
+Where $N$ is the number of documents and $n_t$ is the number of
+documents that contain the term $t$.
+
+So the score of a document is $\sum_{t\in q} w_{t,d}$.
+
+We can store the weights in the index.
+
+To compute the score of a document given a query, we can represent
+the query as a count BoW, and then compute the dot product between
+the query vector and the document vector.
+
+\textbf{Cosine similarity} is a better measure than the dot product, we have to
+normalize the vectors and then compute the dot product.
