@@ -1,0 +1,122 @@
+\subsection{Learning embeddings}
+\label{sec:learning_embeddings}
+
+If we have two words $w_i$ and $w_j$ represented with one-hot encoded vectors $x_i$ and $x_j$ we can
+compute te cosine similarity between the two words as follows:
+\[
+    \cos(w_i,w_j)=\frac{x_i\cdot x_j}{\|x_i\|\|x_j\|}
+\]
+This approach returns always 0 for different words so it's not that useful.
+With word embeddings we can compute the cosine similarity between two words as follows:
+\[
+    \cos(w_i,w_j)=\frac{x_iE\cdot x_jE}{\|x_iE\|\|x_jE\|}
+\]
+
+Why instead of learning a full neural network we don't just learn the embeddings?
+In linguistics there is a concept called \textbf{distributional hypothesis} that states
+that words that appear in the same context have similar meanings.
+The idea is to learn similar embeddings for words that appear in the same context.
+
+In 2023 Mikolov et al. proposed the \textbf{word2vec} model.
+
+\subsubsection{Continuous bag of words (CBOW) model}
+
+We start with a \textbf{center word} $w_c$ and a context of $2m$ words (symmetric window of size $m$).
+
+The model is:
+\[
+    P[w_c|w_{c-m},\dots,w_{c-1},w_{c+1},\dots,w_{c+m}]=f(w_c)
+\]
+(the order of the context words does not matter).
+
+For each one-hot encoded word $x_i$ we compute its embedding $e_i=x_iE$. ($E$ is the learnable embedding matrix).
+
+For each center word $w_c$ we compute the centroid of the context words embeddings:
+\[
+    h=\frac{1}{2m}\sum_{-m\leq j\leq m,j\neq 0}e_{c+j}
+\]
+Then with a linear layer we compute the probability distribution over the vocabulary:
+\[
+    P[w_c|w_{c-m},\dots,w_{c-1},w_{c+1},\dots,w_{c+m}]=\text{softmax}(hW)
+\]
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm, auto, thick]
+        % Nodes
+        \node (input) {context};
+        \node (E) [trapezium, trapezium left angle=60, trapezium right angle=60, shape border rotate=270, draw, right of=input] {E};
+        \node (avg) [draw, rectangle, right of=E] {avg};
+        \node (linear) [trapezium, trapezium left angle=60, trapezium right angle=60, draw, shape border rotate=90, right of=avg] {U};
+        \node (softmax) [draw, rectangle,right of=linear] {softmax};
+        \node (output) [right of=softmax] {$f(w_c)$};
+
+        % Edges
+        \draw[->] (input) -- (E);
+        \draw[->] (E) -- (avg);
+        \draw[->] (avg) -- node[above] {$e_c$} (linear);
+        \draw[->] (linear) -- (softmax);
+        \draw[->] (softmax) -- (output);
+    \end{tikzpicture}
+    \caption{CBOW model architecture}
+    \label{fig:cbow_model}
+\end{figure}
+
+The weights of the model are $O(2d|V|)$ and do not depend on the context size.
+Calculating the softmax is unfortunately too expensive because it depends on $|V|$.
+
+To solve this problem we use \textbf{contrastive learning}.
+
+\subsubsection{Skip-gram model}
+
+In the skip-gram model we do the opposite of the CBOW model.
+Given a center word $w_c$ we want to predict the context words.
+\[
+    P(w_{c-m},\dots,w_{c-1},w_{c+1},\dots,w_{c+m}|w_c)
+\]
+
+To make this problem practical we need to use the na\"ive Bayes assumption:
+\[
+    P(w_{c-m},\dots,w_{c-1},w_{c+1},\dots,w_{c+m}|w_c)=\prod_{-m\leq j\leq m,j\neq 0}P(w_{c+j}|w_c)
+\]
+
+The na\"ive Bayes assumption gives us conditional independence, that is
+different from complete independence.
+Given the center word $w_c$ the context words are independent from each other.
+
+Our model will learn to predict the probability distribution of the context words given the center word:
+\[
+    P(w_{c-m},\dots,w_{c-1},w_{c+1},\dots,w_{c+m}|w_c)
+\]
+\[
+    =f(w_{c-m})\dots f(w_{c-1})f(w_{c+1})\dots f(w_{c+m})
+\]
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm, auto, thick]
+        % Nodes
+        \node (input) {$x_c$};
+        \node (E) [trapezium, trapezium left angle=60, trapezium right angle=60, shape border rotate=270, draw, right of=input] {E};
+        \node (linear) [trapezium, trapezium left angle=60, trapezium right angle=60, draw, shape border rotate=90, right of=E] {U};
+        \node (softmax) [draw, rectangle,right of=linear] {softmax};
+        \node (output) [right of=softmax] {$P(w_{c+j}|w_c)$};
+
+        % Edges
+        \draw[->] (input) -- (E);
+        \draw[->] (E) -- node[above] {$e_c$} (linear);
+        \draw[->] (linear) -- (softmax);
+        \draw[->] (softmax) -- (output);
+    \end{tikzpicture}
+    \caption{Skip-gram model architecture}
+    \label{fig:skip_gram_model}
+\end{figure}
+
+The loss will be:
+\[
+    \mathcal{L}=-\frac{1}{T}\sum_{c=1}^{T}\sum_{-m\leq j\leq m,j\neq 0}\log f(w_{c+j})
+\]
+
+The problem is the same as before: the softmax and the loss are too expensive.
+
+
