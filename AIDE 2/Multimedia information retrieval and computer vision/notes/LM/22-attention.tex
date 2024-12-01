@@ -1,0 +1,165 @@
+\subsection{Attention}
+\label{sec:attention}
+
+Imagine we have a dictionary:
+\[
+    D={(k_1,v_1),(k_2,v_2),\ldots,(k_m,v_m)}
+\]
+With $k_i\in\mathbb{R}^{k}$ and $v_i\in\mathbb{R}^{v}$.
+Let's suppose this is a dictionary of vectors, where keys and values can be different dimensions.
+Let's also assume that all keys are different. If this holds this is a vector dictionary.
+The main problem that we have to solve on a dictionary is the \textbf{lookup}. We are given a \textbf{query}
+in the same space of the keys.
+The goal is to find $v_i$ if $k_i=q$ else return $0$.
+In this case with vectors made of real numbers, if we were to implement it in this way it would be useless.
+We relax the problem and change it to a soft lookup:
+We check all the nearby keys and we return a weighted sum of the values of the nearby keys, the weight is 
+computed with a sort of score function.
+
+The contribution is calculated with a score function $a$:
+\[
+    a:\mathbb{R}^{k}\times\mathbb{R}^{k}\rightarrow\mathbb{R}
+\]
+that takes the query and the key and returns a scalar.
+
+Because we run this function for the whole dictionary we will end up having
+$m$ different values.
+These numbers are called \textbf{attention scores}.
+We want to select an $a$ that gives us \textbf{convex combinations} of the values.
+To do this the sum of the scores must equal $1$.
+We call this specific type of attention function $\alpha$.
+
+We define the soft\_lookup operation as:
+\[
+    \text{soft\_lookup}(q,D)=\sum_{i=1}^{m}\alpha(q,k_i)v_i
+\]
+
+The attention is called like this because we compute how "important" the keys are for the query.
+
+How do we compute the attention scores? We need to compute the similarity between the query and the keys,
+to do this we use the \textbf{dot product}:
+\[
+    a(q,k_i)=q\cdot k_i
+\]
+Now we have to keep the sum of those scores equal to $1$, to do this we use the \textbf{softmax} function.
+So the attention function is:
+\[
+    \alpha(q,k_i)=\left(\text{softmax}([a(q,k_1),a(q,k_2),\ldots,a(q,k_m)])\right)_i
+\]
+This is not the only way to compute attention but it's the simplest one.
+
+We want to keep the variance under control, because a high variance can lead to numerical instability.
+Assume that all components of the keys and queries are normally distributed ($N(0,1)$), let's see what happens to their dot product:
+\[
+    E[a(q,k_i)]=E[q\cdot k_i]=E\left[\sum_{j=1}^{k}q_jk_{ij}\right]=\sum_{j=1}^{k}E[q_j]E[k_{ij}]=0
+\]
+\[
+    V[a(q,k_i)]=E[(q\cdot k_i)^2]-E[q\cdot k_i]^2=E[(q\cdot k_i)^2]
+\]
+Because the mean is $0$. Then:
+\[
+    E[(q\cdot k_i)^2]=E\left[(\sum_{j=1}^{k}q_jk_{ij})^2\right]=\sum_{j=1}^{k}E[q_j^2]E[k_{ij}^2]=k
+\]
+So the variance of the dot product is $k$.
+At certain point during the backpropagation, the gradients explode. This happens because the variance of the dot product is not $1$.
+The way to get variance 1 is to divide the dot product by $\sqrt{k}$:
+\[
+    a(q,k_i)=\frac{q\cdot k_i}{\sqrt{k}}
+\]
+The $\alpha$ function that we get is called \textbf{scaled dot product attention}.
+
+We want to make this computation fast. To do this we want to make it as parallel as possible.
+
+Remember that:
+\begin{itemize}
+    \item $q\in\mathbb{R}^{1\times k}$
+    \item $m$ $k_i\in\mathbb{R}^{1\times k}$
+    \item $m$ $v_i\in\mathbb{R}^{1\times v}$
+\end{itemize}
+
+We create a matrix $K$ with all the keys and a matrix $V$ with all the values:
+\[
+    K=\begin{bmatrix}
+        k_1\\
+        k_2\\
+        \vdots\\
+        k_m
+    \end{bmatrix}
+\]
+\[
+    V=\begin{bmatrix}
+        v_1\\
+        v_2\\
+        \vdots\\
+        v_m
+    \end{bmatrix}
+\]
+And they are respectively of size $m\times k$ and $m\times v$.
+We want to compute all the attention scores in parallel (we need to compute $qk_i^T$ for every $i$).
+If we transpose $K$ we can compute all the scaled dot products in one go with $\frac{qK^T}{\sqrt{k}}$.
+Then we apply the \textbf{softmax} function to get the all the attention scores $\alpha_i$ in a single vector.
+Now we need to compute the combinations of the values, we can do this with a matrix multiplication:
+\[
+    \tilde{v}=[\alpha_1,\alpha_2,\ldots,\alpha_m]V
+\]
+$\tilde{v}$ is a vector of size $1\times v$.
+
+Let's write it all together:
+\[
+    \tilde{v}=\text{softmax}\left(\frac{qK^T}{\sqrt{k}}\right)V
+\]
+This is called the \textbf{scaled dot attention} for a single query.
+
+Now we want to compute it for $n$ queries, let's stack them in a matrix $Q$:
+\[
+    Q=\begin{bmatrix}
+        q_1\\
+        q_2\\
+        \vdots\\
+        q_n
+    \end{bmatrix}
+\]
+$Q$ is of size $n\times k$.
+
+Now what happens if we plug $Q$ into the formula?
+We get $QK^T$ which is of size $n\times m$.
+We can see that the elements of the matrix are the dot products of the queries with the keys.
+\[
+    QK^T=\begin{bmatrix}
+        q_1k_1^T & q_1k_2^T & \ldots & q_1k_m^T\\
+        q_2k_1^T & q_2k_2^T & \ldots & q_2k_m^T\\
+        \vdots & \vdots & \ddots & \vdots\\
+        q_nk_1^T & q_nk_2^T & \ldots & q_nk_m^T
+    \end{bmatrix}
+\]
+We can apply the softmax function \textbf{at row level} to get:
+\[
+    \text{softmax}_\text{row}(\frac{QK^T}{\sqrt{k}})=\begin{bmatrix}
+        \alpha_{11} & \alpha_{12} & \ldots & \alpha_{1m}\\
+        \alpha_{21} & \alpha_{22} & \ldots & \alpha_{2m}\\
+        \vdots & \vdots & \ddots & \vdots\\
+        \alpha_{n1} & \alpha_{n2} & \ldots & \alpha_{nm}
+    \end{bmatrix}
+\]
+That are the attention scores for all the queries.
+By multiplying this matrix with $V$ we get:
+\[
+    \text{softmax}_\text{row}(\frac{QK^T}{\sqrt{k}})V=\begin{bmatrix}
+        \tilde{v}_1\\
+        \tilde{v}_2\\
+        \vdots\\
+        \tilde{v}_n
+    \end{bmatrix}
+\]
+That are the values for all the queries.
+The resulting formula is:
+\[
+    \tilde{V}=\text{softmax}_\text{row}\left(\frac{QK^T}{\sqrt{k}}\right)V
+\]
+This is the \textbf{scaled dot attention} for multiple queries.
+
+What is the complexity of this operation?
+Let's assume that $k=v=d$
+The overall complexity is $O(nmd)$.
+If the number of queries and keys is comparable and $d$ is much smaller than $m$
+the complexity is $O(n^2)$. So the complexity is \textbf{quadratic}.
