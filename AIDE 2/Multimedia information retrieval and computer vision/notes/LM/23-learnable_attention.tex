@@ -118,7 +118,7 @@ So with $h$ heads we will have $h$ different outputs.
 \]
 And then, with the concatenated output, we compute:
 \[
-    \tilde{\tilde{V}}=\tilde{V}W_O
+    \tsup{V}=\tilde{V}W_O
 \]
 Where $W_O$ is a learnable matrix.
 
@@ -135,7 +135,7 @@ Where $W_O$ is a learnable matrix.
         \node (AH_h) [draw, rectangle, right of=dots, node distance=1.5cm, minimum width=1.5cm] {$AH_h$};
         \node (concat) [draw, ellipse, above of=AH_1] {Concat};
         \node (W_O) [draw, rectangle, above of=concat] {$W_O$};
-        \node (output) [above of=W_O] {$\tilde{\tilde{V}}$};
+        \node (output) [above of=W_O] {$\tsup{V}$};
 
         % Arrows
         \draw [->] (Q) |- ++(0,0.4) -| (Q.north |- AH_1.south);
@@ -163,7 +163,7 @@ Where $W_O$ is a learnable matrix.
 
 We can summarize the multi-head attention as:
 \[
-    \tilde{\tilde{V}}=MHA(Q,K,V|W_I,W_O)
+    \tsup{V}=\text{MHA}(Q,K,V|W_I,W_O)
 \]
 Summarizing all the input transformations for each head with $W_I$ and the output transformation with $W_O$.
 We can use self attention and/or causal self attention in the multi-head attention.

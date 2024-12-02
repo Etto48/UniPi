@@ -14,6 +14,16 @@
     filecolor=magenta,      
     urlcolor=cyan,
 }
+\usepackage{stackengine}
+\stackMath
+\newcommand\tsup[2][2]{%
+ \def\useanchorwidth{T}%
+  \ifnum#1>1%
+    \stackon[-.5pt]{\tsup[\numexpr#1-1\relax]{#2}}{\scriptscriptstyle\sim}%
+  \else%
+    \stackon[.5pt]{#2}{\scriptscriptstyle\sim}%
+  \fi%
+}
 
 \title{Multimedia information retrieval and computer vision\\
 \large Lecture notes}
