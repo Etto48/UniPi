@@ -131,24 +131,29 @@ Where $W_O$ is a learnable matrix.
         \node (V) [right of=K, node distance=0.5cm] {$V$};
         \node (AH_1) [draw, rectangle, above of=K, minimum width=1.5cm] {$AH_1$};
         \node (AH_2) [draw, rectangle, right of=AH_1, node distance=2cm, minimum width=1.5cm] {$AH_2$};
-        \node (AH_h) [draw, rectangle, right of=AH_2, node distance=2cm, minimum width=1.5cm] {$AH_h$};
+        \node (dots) [right of=AH_2, node distance=1.5cm] {$\ldots$};
+        \node (AH_h) [draw, rectangle, right of=dots, node distance=1.5cm, minimum width=1.5cm] {$AH_h$};
         \node (concat) [draw, ellipse, above of=AH_1] {Concat};
         \node (W_O) [draw, rectangle, above of=concat] {$W_O$};
         \node (output) [above of=W_O] {$\tilde{\tilde{V}}$};
 
         % Arrows
-        \draw [->] (Q) |- ++(0,0.5) -| (AH_1);
-        \draw [->] (K) |- ++(0,0.5) -| (AH_1);
-        \draw [->] (V) |- ++(0,0.5) -| (AH_1);
-        \draw [->] (Q) |- ++(0,0.5) -| (AH_2);
+        \draw [->] (Q) |- ++(0,0.4) -| (Q.north |- AH_1.south);
+        \draw [->] (K) |- ++(0,0.5) -| (K.north |- AH_1.south);
+        \draw [->] (V) |- ++(0,0.6) -| (V.north |- AH_1.south);
+        \draw [->] (Q) |- ++(0,0.4) -| ($ (AH_2.south) + (-0.5,0) $);
         \draw [->] (V) |- ++(0,0.5) -| (AH_2);
-        \draw [->] (K) |- ++(0,0.5) -| (AH_2);
-        \draw [->] (Q) |- ++(0,0.5) -| (AH_h);
+        \draw [->] (K) |- ++(0,0.6) -| ($ (AH_2.south) + (0.5,0) $);
+        \draw [->] (Q) |- ++(0,0.4) -| ($ (dots.south) + (-0.2, 0) $);
+        \draw [->] (V) |- ++(0,0.5) -| (dots);
+        \draw [->] (K) |- ++(0,0.6) -| ($ (dots.south) + (0.2, 0) $);
+        \draw [->] (Q) |- ++(0,0.4) -| ($ (AH_h.south) + (-0.5,0) $);
         \draw [->] (K) |- ++(0,0.5) -| (AH_h);
-        \draw [->] (V) |- ++(0,0.5) -| (AH_h);
+        \draw [->] (V) |- ++(0,0.6) -| ($ (AH_h.south) + (0.5,0) $);
         \draw [->] (AH_1) |- ++(0,0.5) -| (concat);
-        \draw [->] (AH_2) |- ++(0,0.5) -| (concat);
-        \draw [->] (AH_h) |- ++(0,0.5) -| (concat);
+        \draw [->] (AH_2) |- ++(0,0.5) |- (concat);
+        \draw [->] (dots) |- ++(0,0.5) |- (concat);
+        \draw [->] (AH_h) |- ++(0,0.5) |- (concat);
         \draw [->] (concat) -- (W_O);
         \draw [->] (W_O) -- (output);
     \end{tikzpicture}
