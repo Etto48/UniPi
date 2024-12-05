@@ -1,0 +1,166 @@
+\subsection{Transformers}
+\label{sec:transformers}
+
+There are two main components in the transformer architecture:
+\begin{itemize}
+    \item The \textbf{encoder} layer
+    \item The \textbf{decoder} layer
+\end{itemize}
+
+The encoder layer receives an input $X$ and produces an output $E$.
+\[
+    Z=\text{LayerNorm}(\text{MHA}(X|W_I,W_O)+X|\gamma_1,\beta_1)
+\]
+\[
+    E=\text{LayerNorm}(\sigma(ZW_1)W_2+Z|\gamma_2,\beta_2)
+\]
+
+The decoder layer takes as input $E$ and $Y$ and produces an output $D$.
+
+\[
+    Z_1=\text{LayerNorm}(\text{MHCA}(Y|W_{I_1},W_{O_1})+Y|\gamma_1,\beta_1)
+\]
+\[
+    Z_2=\text{LayerNorm}(\text{MHA}(E|W_{I_2},W_{O_2})+E|\gamma_2,\beta_2)
+\]
+\[
+    D=\text{LayerNorm}(\sigma(Z_2W_1)W_2+Z_2|\gamma_3,\beta_3)
+\]
+
+The input embeddings are computed as usual:
+\[
+    X=xW_e
+\]
+\[
+    Y=yW_e
+\]
+
+Because attention is permutation invariant, to make the order of the words matter we need to add positional encodings to the input embeddings.
+We cannot simply add the number of the word to the embedding because the magnitude will explode.
+Even normalizing between 0 and 1 is not a goode idea because the maximum length is not
+known in advance and the model will not generalize well.
+The best method is to use Fourier encoding:
+\[
+    P=\begin{bmatrix}
+        \sin(\omega_1*i) \\
+        \cos(\omega_1*i) \\
+        \sin(\omega_2*i) \\
+        \cos(\omega_2*i) \\
+        \vdots \\
+        \sin(\omega_{d/2}*i) \\
+        \cos(\omega_{d/2}*i) \\
+    \end{bmatrix}
+\]
+And $\omega_k$ is:
+\[
+    \omega_k=\frac{1}{10000^{2k/d}}
+\]
+This encodes relative position between words.
+These positional encodings are added to the input embeddings.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        % Nodes
+        \node (e_input) {Input sequence};
+        \node (e_embedding) [draw, rectangle, above of=e_input] {Embedding};
+        \node (e_pos_add) [draw, circle, above of=e_embedding] {$+$};
+        \node (e_pos) [draw, circle, right of=e_pos_add] {$P$};
+        \node (e_MHA) [draw, rectangle, above of=e_pos_add, node distance=1.5cm] {MHA};
+        \node (e_add1) [draw, circle, above of=e_MHA] {$+$};
+        \node (e_ln1) [draw, rectangle, above of=e_add1] {LayerNorm};
+        \node (e_ff) [draw, rectangle, above of=e_ln1] {FF};
+        \node (e_add2) [draw, circle, above of=e_ff] {$+$};
+        \node (e_ln2) [draw, rectangle, above of=e_add2] {LayerNorm};
+
+        % Arrows
+        \draw [->] (e_input) -- (e_embedding);
+        \draw [->] (e_embedding) -- (e_pos_add);
+        \draw [->] (e_pos) -- (e_pos_add);
+        \draw [->] (e_pos_add) -- (e_MHA.south);
+        \draw [->] (e_pos_add.north) -- ++(0,0.6) -| ($(e_MHA.south) + (0.2,0)$);
+        \draw [->] (e_pos_add.north) -- ++(0,0.6) -| ($(e_MHA.south) + (-0.2,0)$);
+        \draw [->] (e_MHA) -- (e_add1);
+        \draw [->] (e_pos_add.north) |- ++(0,0.5) -- ++(-1,0) |- (e_add1.west);
+        \draw [->] (e_add1) -- (e_ln1);
+        \draw [->] (e_ln1) -- (e_ff);
+        \draw [->] (e_ln1.north) |- ++(0,0.2) -- ++(-1,0) |- (e_add2.west);
+        \draw [->] (e_ff) -- (e_add2);
+        \draw [->] (e_add2) -- (e_ln2);
+
+        % Nodes
+        \node (input) [right of=e_input, node distance=4cm] {Output sequence};
+        \node (embedding) [draw, rectangle, above of=input] {Embedding};
+        \node (pos_add) [draw, circle, above of=embedding] {$+$};
+        \node (pos) [draw, circle, right of=pos_add] {$P$};
+        \node (MHCA) [draw, rectangle, above of=pos_add, node distance=1.5cm] {MHCA};
+        \node (add1) [draw, circle, above of=MHCA] {$+$};
+        \node (ln1) [draw, rectangle, above of=add1] {LayerNorm};
+        \node (MHA) [draw, rectangle, above of=ln1] {MHA};
+        \node (add2) [draw, circle, above of=MHA] {$+$};
+        \node (ln2) [draw, rectangle, above of=add2] {LayerNorm};
+        \node (ff) [draw, rectangle, above of=ln2] {FF};
+        \node (add3) [draw, circle, above of=ff] {$+$};
+        \node (ln3) [draw, rectangle, above of=add3] {LayerNorm};
+        \node (out_linear) [draw, rectangle, above of=ln3, node distance=1.5cm] {Linear};
+        \node (softmax) [draw, rectangle, above of=out_linear] {Softmax};
+        \node (out) [above of=softmax] {Output probabilities};
+
+        % Arrows
+        \draw [->] (input) -- (embedding);
+        \draw [->] (embedding) -- (pos_add);
+        \draw [->] (pos) -- (pos_add);
+        \draw [->] (pos_add) -- (MHCA);
+        \draw [->] (pos_add.north) -- ++(0,0.6) -| ($(MHCA.south) + (0.2,0)$);
+        \draw [->] (pos_add.north) -- ++(0,0.6) -| ($(MHCA.south) + (-0.2,0)$);
+        \draw [->] (MHCA) -- (add1);
+        \draw [->] (pos_add.north) |- ++(0,0.5) -- ++(-1,0) |- (add1.west);
+        \draw [->] (add1) -- (ln1);
+        \draw [->] (ln1.north) -- ++(0,0.2) -| ($(MHA.south) + (0.2,0)$);
+        \draw [->] (e_ln2.north) -- ++(0,0.7) node[above] {E} -| ++(2,0) -- ++(0,-3.4) -| (MHA.south);
+        \draw [->] (e_ln2.north) -- ++(0,0.7) -| ++(2,0) -- ++(0,-3.4) -| ($(MHA.south) + (-0.2,0)$);
+        \draw [->] (ln1.north) |- ++(0,0.2) -- ++(-1,0) |- (add2.west);
+        \draw [->] (MHA) -- (add2);
+        \draw [->] (add2) -- (ln2);
+        \draw [->] (ln2) -- (ff);
+        \draw [->] (ln2.north) |- ++(0,0.2) -- ++(-1,0) |- (add3.west);
+        \draw [->] (ff) -- (add3);
+        \draw [->] (add3) -- (ln3);
+        \draw [->] (ln3) -- node[right] {D} (out_linear);
+        \draw [->] (out_linear) -- (softmax);
+        \draw [->] (softmax) -- (out);
+
+        % Draw a box around the encoder
+        \draw[dashed] ($(e_MHA) - (1.5,0.9)$) rectangle ($(e_ln2) + (1.5,0.5)$);
+        \node at ($(e_ln2) + (-1.5,1)$) {Encoder};
+        \node at ($(e_ln2) + (-2,-3)$) {$N\times$};
+
+        % Draw a box around the decoder
+        \draw[dashed] ($(MHCA) - (1.5,0.9)$) rectangle ($(ln3) + (1.5,0.5)$);
+        \node at ($(ln3) + (1.5,1)$) {Decoder};
+        \node at ($(ln3) + (2,-4.5)$) {$\times N$};
+        
+    \end{tikzpicture}
+    \caption{Transformer architecture}
+    \label{fig:transformer-architecture}  
+\end{figure}
+
+We start from a random language model and a huge dataset, then we learn the it with a lot of GPUs.
+This operation costs so much that then the model is used as-is, without further training.
+
+After generic training, we can retrain the model on a specific task (downstream task).
+This operation is much cheaper than retraining the model from scratch.
+
+The first training is called \textbf{pre-training}, the second is called \textbf{fine-tuning}.
+
+We can train a model in two ways:
+\begin{itemize}
+    \item \textbf{Masked language model}: If the objective is to guess a missing word
+    in a sentence.
+    \item \textbf{Causal language model}: If the objective is to predict the next word
+\end{itemize}
+
+Large Language Models (LLM) are just a big transformer model.
+Scaling up the model, the model starts to be able to do tasks
+it's not trained for, like translation, summarization, etc.
+These models are called \textbf{foundational models}.
