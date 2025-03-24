@@ -43,4 +43,4 @@ The dual problem is always a convex optimization problem even if the primal prob
 
 If the primal is continuously differentiable and convex and ACQ holds at the solution, then v(D)=v(P).
 
-$L(x^*,\lambda,\mu)\leq L(x^*,\lambda^*,\mu^*)\leq L(x,\lambda^*,\lambda^*)$ iff $x^*,\lambda^*,\mu^*$ is an optimal solution and strong duality holds.
+$L(x^*,\lambda,\mu)\leq L(x^*,\lambda^*,\mu^*)\leq L(x,\lambda^*,\mu^*)$ iff $x^*,\lambda^*,\mu^*$ is an optimal solution and strong duality holds.
