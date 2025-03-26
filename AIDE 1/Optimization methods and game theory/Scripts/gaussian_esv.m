@@ -53,7 +53,7 @@ function [la_plus,la_minus] = gaussian_esv(X,y,e,C,gamma)
         i = sv(1);
         b = y(i) + e;
         for j = 1:n
-            b = b + (la_plus(j) - la_minus(j))*kernel(X(j,:),X(i,:));
+            b = b - (la_plus(j) - la_minus(j))*kernel(X(j,:),X(i,:));
         end
     end
 

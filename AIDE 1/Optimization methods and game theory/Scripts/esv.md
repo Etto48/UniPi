@@ -50,3 +50,15 @@ $$w=\sum_{i}(\lambda^+_i-\lambda^-_i)x_i$$
 If $\exists i$ s.t. $0<\lambda^+_i<C$ then $b=y_i-w^Tx_i-\varepsilon$.
 
 If $\exists i$ s.t. $0<\lambda^-_i<C$ then $b=y_i-w^Tx_i+\varepsilon$.
+
+## Non-linear $\varepsilon$-SV Regression
+
+We can just replace $x^i\cdot x^j$ with $K(x^i,x^j)$ in the dual problem of the linear $\varepsilon$-SV Regression with slack variables.
+
+The regression function is
+$$f(x)=\sum_{i}(\lambda^+_i-\lambda^-_i)K(x^i,x)+b$$
+Where $b$ is computed as
+
+If $\exists i$ s.t. $0<\lambda^+_i<C$ then $$b=y_i-\varepsilon-\sum_{j}(\lambda^+_j-\lambda^-_j)K(x^j,x^i)$$
+
+If $\exists i$ s.t. $0<\lambda^-_i<C$ then $$b=y_i+\varepsilon-\sum_{j}(\lambda^+_j-\lambda^-_j)K(x^j,x^i)$$
