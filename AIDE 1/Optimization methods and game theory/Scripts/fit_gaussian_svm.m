@@ -69,5 +69,6 @@ function [la] = fit_gaussian_svm(A,B,C,gamma)
             ...
             "Linewidth", 1.5);
         axis([x_min_max y_min_max]);
+        hold off;
     end
 end
