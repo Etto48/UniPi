@@ -4,14 +4,14 @@
 
 The problem is
 $$\begin{cases}
-    \text{min }\frac{1}{2}||w||^2\\
+    \min\frac{1}{2}||w||^2\\
     |y_i-w^Tx_i-b|\leq\varepsilon\forall i
 \end{cases}$$
 
 We can split the absolute value into two inequalities:
 
 $$\begin{cases}
-    \text{min }\frac{1}{2}||w||^2\\
+    \min\frac{1}{2}||w||^2\\
     y_i-w^Tx_i-b\leq\varepsilon\forall i\\
     -y_i+w^Tx_i+b\leq\varepsilon\forall i
 \end{cases}$$
@@ -20,7 +20,7 @@ $$\begin{cases}
 
 The problem is
 $$\begin{cases}
-    \text{min }\frac{1}{2}||w||^2+C\sum_{i}\xi_i\\
+    \min\frac{1}{2}||w||^2+C\sum_{i}\xi_i\\
     y_i-w^Tx_i-b\leq\varepsilon+\xi^+_i\forall i\\
     -y_i+w^Tx_i+b\leq\varepsilon+\xi^-_i\forall i\\
     \xi^+_i\geq0\forall i\\
@@ -29,7 +29,7 @@ $$\begin{cases}
 
 The dual problem is
 $$\begin{cases}
-    \text{max}_{\lambda^+,\lambda^-}-\frac{1}{2}\sum_{i}\sum_{j}(\lambda^+_i-\lambda^-_i)(\lambda^+_j-\lambda^-_j)(x^i)^Tx^j\\\hspace{50pt}-\varepsilon\sum_{i}(\lambda^+_i+\lambda^-_i)+\sum_{i}y_i(\lambda^+_i-\lambda^-_i)\\
+    \max_{\lambda^+,\lambda^-}-\frac{1}{2}\sum_{i}\sum_{j}(\lambda^+_i-\lambda^-_i)(\lambda^+_j-\lambda^-_j)(x^i)^Tx^j\\\hspace{50pt}-\varepsilon\sum_{i}(\lambda^+_i+\lambda^-_i)+\sum_{i}y_i(\lambda^+_i-\lambda^-_i)\\
     \sum_{i}(\lambda^+_i-\lambda^-_i)=0\\
     0\leq\lambda^+_i\leq C\forall i\\
     0\leq\lambda^-_i\leq C\forall i
@@ -37,7 +37,7 @@ $$\begin{cases}
 
 In matrix form
 $$\begin{cases}
-    \text{max}_{\lambda^+,\lambda^-}-\frac{1}{2}\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}^TQ\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}+\left(-\varepsilon 1^T+\begin{pmatrix}y\\-y\end{pmatrix}^T\right)\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}\\
+    \max_{\lambda^+,\lambda^-}-\frac{1}{2}\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}^TQ\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}+\left(-\varepsilon 1^T+\begin{pmatrix}y\\-y\end{pmatrix}^T\right)\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}\\
     1^T(\lambda^+-\lambda^-)=0\\
     0\leq\lambda^+\leq C\\
     0\leq\lambda^-\leq C

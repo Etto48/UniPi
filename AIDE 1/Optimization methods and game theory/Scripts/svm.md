@@ -4,20 +4,20 @@
 
 We must solve the problem
 $$\begin{cases}
-  \text{min }\frac{1}{2}||w||^2\\
+  \min\frac{1}{2}||w||^2\\
   1-y_i(w^Tx_i+b)\leq0\forall i
 \end{cases}$$
 
 The dual problem is
 $$\begin{cases}
-  \text{max}_\lambda-\frac{1}{2}\sum_{i}\sum_{j}y^iy^j(x^i)^Tx^j\lambda_i\lambda_j+\sum_{i}\lambda_i\\
+  \max_\lambda-\frac{1}{2}\sum_{i}\sum_{j}y^iy^j(x^i)^Tx^j\lambda_i\lambda_j+\sum_{i}\lambda_i\\
   \sum_{i}y^i\lambda_i=0\\
   \lambda_i\geq0\forall i
 \end{cases}$$
 
 Also written as
 $$\begin{cases}
-  \text{max}_\lambda-\frac{1}{2}\lambda^TX^TX\lambda+1^T\lambda\\
+  \max_\lambda-\frac{1}{2}\lambda^TX^TX\lambda+1^T\lambda\\
   y^T\lambda=0\\
   \lambda\geq0
 \end{cases}$$
@@ -28,21 +28,21 @@ Where $X=\{y^ix^i\}$.
 
 We must solve the problem
 $$\begin{cases}
-  \text{min }\frac{1}{2}||w||^2+C\sum_{i}\xi_i\\
+  \min\frac{1}{2}||w||^2+C\sum_{i}\xi_i\\
   1-y_i(w^Tx_i+b)\leq-\xi_i\forall i\\
   \xi_i\geq0\forall i
 \end{cases}$$
 
 The dual problem is
 $$\begin{cases}
-  \text{max}_\lambda-\frac{1}{2}\sum_{i}\sum_{j}y^iy^j(x^i)^Tx^j\lambda_i\lambda_j+\sum_{i}\lambda_i\\
+  \max_\lambda-\frac{1}{2}\sum_{i}\sum_{j}y^iy^j(x^i)^Tx^j\lambda_i\lambda_j+\sum_{i}\lambda_i\\
   \sum_{i}y^i\lambda_i=0\\
   0\leq\lambda_i\leq C\forall i
 \end{cases}$$
 
 Also written as
 $$\begin{cases}
-  \text{max}_\lambda-\frac{1}{2}\lambda^TX^TX\lambda+1^T\lambda\\
+  \max_\lambda-\frac{1}{2}\lambda^TX^TX\lambda+1^T\lambda\\
   y^T\lambda=0\\
   0\leq\lambda\leq C
 \end{cases}$$
@@ -53,7 +53,7 @@ Where $X=\{y^ix^i\}$.
 
 We must solve the problem
 $$\begin{cases}
-  \text{min }\frac{1}{2}||w||^2+C\sum_{i}\xi_i\\
+  \min\frac{1}{2}||w||^2+C\sum_{i}\xi_i\\
   1-y_i(w^T\phi(x_i)+b)\leq-\xi_i\forall i\\
   \xi_i\geq0\forall i
 \end{cases}$$
@@ -62,14 +62,14 @@ $w$ might be infinite-dimensional so we have to use the dual problem.
 
 The dual problem is
 $$\begin{cases}
-  \text{max}_\lambda-\frac{1}{2}\sum_{i}\sum_{j}y^iy^j\phi(x^i)^T\phi(x^j)\lambda_i\lambda_j+\sum_{i}\lambda_i\\
+  \max_\lambda-\frac{1}{2}\sum_{i}\sum_{j}y^iy^j\phi(x^i)^T\phi(x^j)\lambda_i\lambda_j+\sum_{i}\lambda_i\\
   \sum_{i}y^i\lambda_i=0\\
   0\leq\lambda_i\leq C\forall i
 \end{cases}$$
 
 Also written as
 $$\begin{cases}
-  \text{max}_\lambda-\frac{1}{2}\lambda^TK\lambda+1^T\lambda\\
+  \max_\lambda-\frac{1}{2}\lambda^TK\lambda+1^T\lambda\\
   y^T\lambda=0\\
   0\leq\lambda\leq C
 \end{cases}$$

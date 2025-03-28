@@ -27,13 +27,13 @@ $$\begin{cases}
 
 If the problem is convex the solution is a global optimum.
 
-The $\text{inf }L(x,\lambda,\mu)$ is the Lagrangian relaxation of the problem P, provides a lower bound to the optimal value of P.
+The $\inf L(x,\lambda,\mu)$ is the Lagrangian relaxation of the problem P, provides a lower bound to the optimal value of P.
 
-$\varphi(\lambda,\mu)=\text{inf}_{x\in\mathbb{R}^n}L(x,\lambda,\mu)$ is the dual function.
+$\varphi(\lambda,\mu)=\inf_{x\in\mathbb{R}^n}L(x,\lambda,\mu)$ is the dual function.
 
 This is the dual problem
 $$\begin{cases}
-  \text{max }\varphi(\lambda,\mu)\\
+  \max\varphi(\lambda,\mu)\\
   \lambda\geq0
 \end{cases}$$
 
