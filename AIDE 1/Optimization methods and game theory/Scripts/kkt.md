@@ -1,5 +1,12 @@
 # KKT
 
+Given the problem
+$$\begin{cases}
+  \min f(x) \\
+  g_i(x) \leq 0\forall i\\
+  h_i(x) = 0\forall i
+\end{cases}\hspace{30pt}(P)$$
+
 ## Abadie Constraint Qualification
 
 ACQ holds if $T_x(x^*)=D(x^*)$
@@ -35,7 +42,7 @@ This is the dual problem
 $$\begin{cases}
   \max\varphi(\lambda,\mu)\\
   \lambda\geq0
-\end{cases}$$
+\end{cases}\hspace{30pt}(D)$$
 
 $v(D)\leq v(P)$
 

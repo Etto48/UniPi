@@ -26,7 +26,7 @@ The problem
 $$\begin{cases}
 \min f(x) \\
 g_i(x) \leq 0\forall i
-\end{cases}$$
+\end{cases}\hspace{30pt}(P)$$
 
 With $X$ the feasible set.
 
@@ -37,7 +37,7 @@ And then the problem becomes
 $$\begin{cases}
 \min f(x) + \frac{1}{\varepsilon}p(x) := f_\varepsilon(x) \\
 x\in\mathbb{R}^n
-\end{cases}$$
+\end{cases}\hspace{20pt}(P_\varepsilon)$$
 
 If $x^*$ solves $(P_\varepsilon)$ and $x^*\in X$ then $x^*$ also solves $(P)$.
 
@@ -54,14 +54,14 @@ The problem
 $$\begin{cases}
 \min f(x) \\
 g_i(x) \leq 0\forall i
-\end{cases}$$
+\end{cases}\hspace{30pt}(P)$$
 With $X$ the feasible set.
 
 Can be approximated inside $\text{int}(X)$ by the problem
 $$\begin{cases}
 \min f(x) - \varepsilon\sum_{i=1}^m \log(-g_i(x)) := \psi_\varepsilon(x) \\
 x\in\text{int}(X)
-\end{cases}$$
+\end{cases}\hspace{10pt}(P_\varepsilon)$$
 
 We call $B(x)=-\sum_{i=1}^m \log(-g_i(x))$ the barrier function.
 So $\psi_\varepsilon(x) = f(x) - \varepsilon B(x)$.
