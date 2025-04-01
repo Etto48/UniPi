@@ -233,7 +233,9 @@ In matrix form
 
 ```math
 \begin{cases}
-    \max_{\lambda^+,\lambda^-}-\frac{1}{2}\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}^TQ\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}+\left(-\varepsilon 1^T+\begin{pmatrix}y\\-y\end{pmatrix}^T\right)\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}\\
+    \max_{\lambda^+,\lambda^-}-\frac{1}{2}\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}^TQ\begin{pmatrix}\lambda^+\\\lambda^-\end{pmatrix}+\left(-\varepsilon 1^T+\begin{pmatrix}y\\
+    -y\end{pmatrix}^T\right)\begin{pmatrix}\lambda^+\\
+    \lambda^-\end{pmatrix}\\
     1^T(\lambda^+-\lambda^-)=0\\
     0\leq\lambda^+\leq C\\
     0\leq\lambda^-\leq C
@@ -303,7 +305,7 @@ If we fix $`p_i`$ and $`x_j`$ then the problem is
 \end{cases}
 ```
 
-An optimal solution is $`\alpha_{ij}=1`$ if $`j=\argmin_{j=1...k}||p_i-x_j||^2_2`$ and $`0`$ otherwise.
+An optimal solution is $`\alpha_{ij}=1`$ if $`j=\text{argmin}_{j=1...k}||p_i-x_j||^2_2`$ and $`0`$ otherwise.
 
 The problem is equivalent to
 
@@ -320,7 +322,7 @@ If we fix $`x_j`$ then the problem is decomposable in $`n`$ simple LP problems (
 
 ```math
 \alpha^*_{ij}=\begin{cases}
-    1 & \text{if }j=\argmin_{j=1...k}||p_i-x_j||^2_2\\
+    1 & \text{if }j=\text{argmin}_{j=1...k}||p_i-x_j||^2_2\\
     0 & \text{otherwise}
 \end{cases}
 ```
@@ -451,12 +453,10 @@ The algorithm is
 1. Set the tolerance $`\delta>0`$ and $`\tau\in(0,1)`$ and $`\varepsilon_1>0`$. Choose $`x^0\in \text{int}X`$ set $`k=1`$
 2. Find the optimal solution $`x^k`$ of
 
-    ```math
-    \begin{cases}
+    $`\begin{cases}
         \min \psi_\varepsilon(x)\\
         x\in\text{int}X
-    \end{cases}
-    ```
+    \end{cases}`$
 
     using $`x^{k-1}`$ as a starting point.
 3. Then
