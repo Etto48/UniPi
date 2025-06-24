@@ -928,9 +928,24 @@ and
 f_1(\bar{x},\bar{y})=\max_{y\in Y}f_1(\bar{x},y)
 ```
 
-To find a Nash equilibrium, we can remove rows and columns that are strictly dominated by other rows and columns until we have reduced the matrix to a $`1\times 1`$ matrix.
+#### Pure strategy Nash equilibrium algorithm
 
-A strategy is strictly dominated if there is another strategy that is always better than it.
+In a two-player non-cooperative game, a strategy $`x`$ is strictly dominated by $`x'`$ if $`f_1(x,y)\gt f_1(x',y)`$ for all $`y`$. The opposite is true for player 2.
+
+To find a pure strategy Nash equilibrium, we can use the following method:
+
+- For each player
+  - For each strategy
+    - Check if the strategy is strictly dominated by at least one other strategy.
+    - If it is, remove it from the set of strategies.
+- Repeat until no more strategies can be removed.
+
+If one pair of strategies is left, then it is a Nash equilibrium. If more than one pair is left we can use this other method to find the Nash equilibrium:
+
+- Find all the minima along the columns of the matrix $`C`$.
+- Find all the maxima along the rows of the matrix $`C`$.
+- Remember to select all the strategies in a tie.
+- If there is a pair of strategies that is both a minimum and a maximum, then it is a Nash equilibrium.
 
 #### Mixed strategies
 
