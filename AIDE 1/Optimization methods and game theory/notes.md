@@ -5,7 +5,7 @@
 - [Unconstrained optimization](#unconstrained-optimization)
 - [Karush-Kuhn-Tucker conditions](#kkt)
 - [Support Vector Machines](#support-vector-machines)
-- [$`\varepsilon`$-SV Regression](#sv-regression)
+- [$`\varepsilon`$-SV Regression](#e-sv-regression)
 - [Clustering](#clustering)
 - [Solution methods](#solution-methods)
 - [Multiobjective optimization](#multiobjective-optimization)
@@ -89,7 +89,7 @@ A function $`f:\mathbb{R}^n\to\mathbb{R}`$ is convex iff
 
 A function is convex iff its epigraph is a convex set.
 
-A function is strictly convex iff there is $`\lt`$ instead of $`\leq`$ in the definition above.
+A function is strictly convex iff there is $`<`$ instead of $`\leq`$ in the definition above.
 
 A function is strongly convex if there exits $`\tau>0`$ s.t.
 
@@ -184,7 +184,7 @@ Let $`X`$ be an open convex set, $`f`$ a differentiable convex function on $`X`$
 1. Chose a starting point $`x^0\in\mathbb{R}^n`$.
 2. If $`||\nabla f(x^k)||<\varepsilon`$ then STOP.
 3. Compute the search direction $`d^k=-\nabla f(x^k)`$.
-4. Compute an optimal solution $`t_k`$ of the problem $`\text{min}_{t\gt 0} f(x^k + td^k)`$
+4. Compute an optimal solution $`t_k`$ of the problem $`\text{min}_{t> 0} f(x^k + td^k)`$
 5. Set $`x^{k+1}=x^k + t_kd^k`$ and $k=k+1`$.
 6. Go to step 2.
 
@@ -226,7 +226,7 @@ If we have a quadratic problem we can chose the direction like this:
 ```math
 d^k = \begin{cases}
     -\nabla f(x^0) & \text{if } k=0\\
-    -\nabla f(x^k) + \beta_k d^{k-1} & \text{if } k\gt 0
+    -\nabla f(x^k) + \beta_k d^{k-1} & \text{if } k> 0
 \end{cases}
 ```
 
@@ -439,7 +439,7 @@ The decision function will be:
 f(x)=\text{sign}(\sum_{i}\lambda^*_iy^ik(x^i,x)+b^*)
 ```
 
-## $`\varepsilon`$-SV Regression
+## e-SV Regression
 
 ### Linear $`\varepsilon`$-SV Regression
 
@@ -817,7 +817,7 @@ If $`x^*`$ is a **weak minimum** then there exists $`\theta^*\in\mathbb{R}^s`$ s
 \end{cases}\hspace{30pt}(S)
 ```
 
-If the problem is convex, the above condition is also sufficient. If $`\theta^*\gt 0`$ then $`x^*`$ is a **minimum**.
+If the problem is convex, the above condition is also sufficient. If $`\theta^*> 0`$ then $`x^*`$ is a **minimum**.
 
 ### Multiobjective KKT system
 
@@ -930,7 +930,7 @@ f_1(\bar{x},\bar{y})=\max_{y\in Y}f_1(\bar{x},y)
 
 #### Pure strategy Nash equilibrium algorithm
 
-In a two-player non-cooperative game, a strategy $`x`$ is strictly dominated by $`x'`$ if $`f_1(x,y)\gt f_1(x',y)`$ for all $`y`$. The opposite is true for player 2.
+In a two-player non-cooperative game, a strategy $`x`$ is strictly dominated by $`x'`$ if $`f_1(x,y)> f_1(x',y)`$ for all $`y`$. The opposite is true for player 2.
 
 To find a pure strategy Nash equilibrium, we can use the following method:
 
