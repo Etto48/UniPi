@@ -1,5 +1,8 @@
 # Optimization methods and game theory
 
+- [Convex analysis](#convex-analysis)
+- [Existence and Optimality](#existence-and-optimality)
+- [Unconstrained optimization](#unconstrained-optimization)
 - [Karush-Kuhn-Tucker conditions](#kkt)
 - [Support Vector Machines](#support-vector-machines)
 - [$`\varepsilon`$-SV Regression](#sv-regression)
@@ -7,6 +10,253 @@
 - [Solution methods](#solution-methods)
 - [Multiobjective optimization](#multiobjective-optimization)
 - [Game theory](#game-theory)
+
+## Convex analysis
+
+### Compact set
+
+A set is compact iff it is closed and bounded.
+
+### Convex set
+
+A set $`X`$ is convex iff
+
+```math
+\forall x,y\in X, \forall \lambda\in[0,1], \lambda x+(1-\lambda)y\in X
+```
+
+### Affine set
+
+A set $`X`$ is affine iff
+
+```math
+\forall x,y\in X, \forall \lambda\in\mathbb{R}, \lambda x+(1-\lambda)y\in X
+```
+
+### Convex combination
+
+A point $`x`$ is a convex combination of points $`x_1,\ldots,x_n`$ iff
+
+```math
+x = \sum_{i=1}^n \lambda_i x_i
+```
+
+with $`\lambda_i\geq 0`$ and $`\sum_{i=1}^n \lambda_i = 1`$.
+
+### Intersection of convex sets
+
+The intersection of any collection (finite or infinite) of convex sets is convex.
+
+### Convex hull
+
+The convex hull of a set $`X`$ is the smallest convex set containing $`X`$.
+
+### Polyhedron
+
+A polyhedron is the intersection of a finite number of closed half-spaces.
+
+### Affine hull
+
+The affine hull of a set $`X`$ $`\text{aff}(X)`$ is the smallest affine set containing $`X`$.
+
+### Relative interior
+
+The relative interior of a convex set $`X`$ is defined as
+
+```math
+\text{ri}(X) := \{x\in X : \exists \varepsilon>0 \text{ s.t. } \text{aff}(X)\cap B_\varepsilon(x) \subseteq X\}
+```
+
+Where $`B_\varepsilon(x)`$ is the closed ball of radius $`\varepsilon`$ centered at $`x`$
+
+### Cone
+
+A set $`C`$ is a cone iff
+
+```math
+\forall x\in C, \forall \lambda\geq 0, \lambda x\in C
+```
+
+A cone may be convex or not.
+
+### Convex function
+
+A function $`f:\mathbb{R}^n\to\mathbb{R}`$ is convex iff
+
+```math
+\forall x,y\in\mathbb{R}^n, \forall \lambda\in[0,1], f(\lambda x+(1-\lambda)y)\leq \lambda f(x)+(1-\lambda)f(y)
+```
+
+A function is convex iff its epigraph is a convex set.
+
+A function is strictly convex iff there is $`\lt`$ instead of $`\leq`$ in the definition above.
+
+A function is strongly convex if there exits $`\tau>0`$ s.t.
+
+```math
+\forall x,y\in\mathbb{R}^n, \forall \lambda\in[0,1], f(\lambda x+(1-\lambda)y)\leq \lambda f(x)+(1-\lambda)f(y) \\- \frac{\tau}{2}\lambda(1-\lambda)||x-y||^2
+```
+
+A function is convex iff
+
+```math
+\forall x\in C, \nabla^2 f(x) \text{ is positive semidefinite}
+```
+
+A function is strictly convex iff the Hessian is positive definite.
+
+A function is strongly convex iff exists $`\tau>0`$ s.t.
+
+```math
+\nabla^2 f(x) - \tau I \text{ is positive semidefinite}
+```
+
+If $`f`$ is convex $`\alpha f$` is convex.
+
+If $`f_1, f_2`$ are convex then $f_1+f_2$ is convex.
+
+If $`f`$ is convex then $`f(Ax + b)`$ is convex.
+
+If $`f`$ is convex and $`g`$ is convex non-decreasing then $`g\circ f`$ is convex.
+
+If $`f`$ is concave and $`g`$ is convex non-increasing then $`g\circ f`$ is convex.
+
+If $`f`$ is concave and $`g`$ is concave non-decreasing then $`g\circ f`$ is concave.
+
+If $`f`$ is convex and $`g`$ is concave non-increasing then $`g\circ f`$ is concave.
+
+### Quasiconvex function
+
+$`S_k(f) = \{x\in\mathbb{R}^n : f(x)\leq k\}`$ is the sublevel set of $`f`$ at level $`k`$.
+
+A function is quasiconvex on $`C`$ iff
+
+```math
+\forall k\in\mathbb{R}, S_k(f)\cap C \text{ is convex}
+```
+
+## Existence and Optimality
+
+### Weierstrass
+
+If the objective function is continuous and the feasible set is closed and bounded, then a global optimum exists.
+
+### Convex function on convex set
+
+If $`f`$ is convex on the convex set $`X`$ then any local optimum is a global optimum.
+
+If $`f`$ is strictly convex then the optimum is unique.
+
+If $`f`$ is strongly convex and $`X`$ is closed then there exists a global optimum.
+
+### Optimality conditions
+
+#### First order necessary condition
+
+Assume that $`X`$ is an open set, if $`x^*\in X`$ is a local optimum of the problem then:
+
+- $`\nabla f(x^*)=0`$.
+
+#### Second order necessary condition
+
+Assume that $`X`$ is an open set, if $`x^*\in X`$ is a local optimum of the problem then:
+
+- $`\nabla f(x^*)=0`$.
+- $`\nabla^2 f(x^*)\succeq 0`$.
+
+#### Second order sufficient condition
+
+Assume that $`X`$ is an open set, $`x^*\in X`$ and the following conditions hold:
+
+- $`\nabla f(x^*)=0`$.
+- $`\nabla^2 f(x^*)\succ 0`$.
+
+Then $`x^*`$ is a local optimum of the problem.
+
+#### NSC For convex problems
+
+Let $`X`$ be an open convex set, $`f`$ a differentiable convex function on $`X`$ and $`x^*\in X`$. $`x^*`$ is a local optimum of the problem iff $`\nabla f(x^*)=0`$.
+
+## Unconstrained optimization
+
+### Gradient method
+
+1. Chose a starting point $`x^0\in\mathbb{R}^n`$.
+2. If $`||\nabla f(x^k)||<\varepsilon`$ then STOP.
+3. Compute the search direction $`d^k=-\nabla f(x^k)`$.
+4. Compute an optimal solution $`t_k`$ of the problem $`\text{min}_{t\gt 0} f(x^k + td^k)`$
+5. Set $`x^{k+1}=x^k + t_kd^k`$ and $k=k+1`$.
+6. Go to step 2.
+
+If the function is coercive then for any starting point the sequence is bounded and any of its cluster points is a stationary point.
+
+If the function is coercive and convex then any cluster point is a global minimum.
+
+If the function is strongly convex then for any starting point the sequence converges to the unique global minimum.
+
+For quadratic problems like
+
+```math
+f(x) = \frac{1}{2}x^TQx+c^Tx
+```
+
+with Q positive definite, then the step size is
+
+```math
+t_k = \frac{\nabla f(x^k)^T\nabla f(x^k)}{\nabla f(x^k)^TQ\nabla f(x^k)}
+```
+
+The solution converges linearly to the optimum for quadratic problems.
+
+#### Armijo inexact line search
+
+To find the step size for any problem we can use this method.
+
+1. Chose $`\alpha, \gamma\in(0,1)`$ and $`\bar{t}>0`$.
+2. Given $`x^k`$ and $`d^k=-\nabla f(x^k)`$, set $`t=\bar{t}`$.
+3. While $`f(x^k + td^k) > f(x^k) + \alpha t \nabla f(x^k)^Td^k`$ do
+   1. Set $`t = \gamma t`$.
+
+If $`f`$ is coercive then for any starting point the sequence is bounded and any of its cluster points is a stationary point.
+
+#### Conjugate gradient method
+
+If we have a quadratic problem we can chose the direction like this:
+
+```math
+d^k = \begin{cases}
+    -\nabla f(x^0) & \text{if } k=0\\
+    -\nabla f(x^k) + \beta_k d^{k-1} & \text{if } k\gt 0
+\end{cases}
+```
+
+Where $`\beta_k`$ is computed as
+
+```math
+\beta_k = -\frac{\nabla f(x^k)^TQ\nabla f(x^k)}{\nabla f(x^{k-1})^TQ\nabla f(x^{k-1})}
+```
+
+and the step size with the exact line search is
+
+```math
+t_k = \frac{\nabla f(x^k)^T\nabla f(x^k)}{\nabla f(x^k)^TQ\nabla f(x^k)}
+```
+
+This method converges in at most $`r`$ steps where $`r`$ is the number of distinct eigenvalues of $`Q`$.
+
+If $`f`$ is strongly convex then we have global convergence.
+
+We can optionally use Armijo inexact line search to find the step size.
+
+### Newton method
+
+Like the gradient method but the direction is computed as
+
+```math
+d^k : \nabla^2 f(x^k)d^k = -\nabla f(x^k)
+```
+
+The convergence is quadratic inside a neighborhood of the optimum if the hessian of the optimum is positive definite.
 
 ## KKT
 
@@ -105,6 +355,8 @@ Also written as
 
 Where $`X=\{y^ix^i\}`$.
 
+Once we have found $`\lambda^*`$, we can compute $`w^*=\sum_{i}\lambda^*_iy^ix^i`$ and $`b^*=\frac{1}{y^i}-(w^*)^Tx^i`$ for any $`i`$ s.t. $`\lambda^*_i>0`$.
+
 ### Linear SVM with slack variables
 
 We must solve the problem
@@ -138,6 +390,8 @@ Also written as
 ```
 
 Where $`X=\{y^ix^i\}`$.
+
+Once we have found $`\lambda^*`$, we can compute $`w^*=\sum_{i}\lambda^*_iy^ix^i`$ and $`b^*=\frac{1}{y^i}-(w^*)^Tx^i`$ for any $`i`$ s.t. $`0<\lambda^*_i<C`$.
 
 ### Kernel SVM with slack variables
 
@@ -179,7 +433,11 @@ In this way we never need to compute $`\phi(x)`$.
 
 We then choose an $`i`$ s.t. $`0<\lambda_i<C`$ and compute $`b^*=\frac{1}{y^i}-\sum_{j}\lambda^*_jy^jk(x^i,x^j)`$.
 
-The decision function will be $`f(x)=\sum_{i}\lambda^*_iy^ik(x^i,x)+b^*`$.
+The decision function will be:
+
+```math
+f(x)=\text{sign}(\sum_{i}\lambda^*_iy^ik(x^i,x)+b^*)
+```
 
 ## $`\varepsilon`$-SV Regression
 
@@ -407,11 +665,25 @@ If $`x^*`$ solves $`(P_\varepsilon)`$ and $`x^*\in X`$ then $`x^*`$ also solves 
 
 The algorithm to find the solution of $`(P)`$ is
 
-1. Set $`\varepsilon = \varepsilon_0`$ and $`\tau\in(0,1)`$.
+1. Set $`\varepsilon = \varepsilon_0>0`$ and $`\tau\in(0,1)`$.
 2. Solve $`(P_\varepsilon)`$ and get $`x^*`$.
 3. Then
    - If $`x^*\in X`$ then STOP.
    - Else set $`\varepsilon = \tau\varepsilon`$ and go to step 2.
+
+If $`f`$ is coercive then the sequence of solutions $`x^*`$ is bounded and converges to a solution of $`(P)`$.
+
+If the sequence converges to a point, that point is a solution of $`(P)`$.
+
+### Exact penalty method
+
+Same as the penalty method but the penalty function is defined as
+
+```math
+\tilde{p}(x) = \sum_{i=1}^m \max(0, g_i(x)) 
+```
+
+The resulting problem $`(\tilde{P}_\varepsilon)`$ is unconstrained, convex and non-smooth.
 
 ### Logarithmic barrier method
 
@@ -488,13 +760,25 @@ x \in X
 
 Given $`x,y\in\mathbb{R}^s`$ we say that $`x\geq y`$ if $`x_i\geq y_i \forall i=1,\ldots,s`$.
 
-- A point $`\bar{x}`$ is said to be Pareto ideal minimum if $`\bar{x}\leq x \forall x\in X`$
-- A point $`\bar{x}`$ is said to be Pareto minimum if $`\not\exists x\in X : x\neq\bar{x}`$ and $`\bar{x}\geq x`$
-- A point $`\bar{x}`$ is said to be Pareto weak minimum if $`\not\exists x\in X : \bar{x}>x`$ and $`\bar{x}_i>x_i\forall i`$
+- A point $`\bar{x}`$ is said to be Pareto **ideal minimum** (IMin) if $`\bar{x}\leq x \forall x\in X`$
+- A point $`\bar{x}`$ is said to be Pareto **minimum** (Min) if $`\not\exists x\in X : x\neq\bar{x}`$ and $`\bar{x}\geq x`$
+- A point $`\bar{x}`$ is said to be Pareto **weak minimum** (WMin) if $`\not\exists x\in X : \bar{x}>x`$ and $`\bar{x}_i>x_i\forall i`$
+
+If there exists $`\hat{x}\in A`$ s.t. $`A\cap (\hat{x}-\mathbb{R}^s_+)`$ is compact, then $`\text{Min}(A)\neq\emptyset`$.
+
+If $`f_i`$ is continuous and $`X`$ is compact, then there exists a Pareto **minimum** of the problem.
+
+If $`f_i`$ is continuous for any $`i\in\{1,\dots,s\}`$ and $`X`$ is closed and there exists $`v\in\mathbb{R}`$ and $`j\in\{1,\ldots,s\}`$ s.t. the sublevel set
+
+```math
+\{x\in X : f_j(x)\leq v\}
+```
+
+is non-empty and bounded, then there exists a **minimum** of the problem.
 
 ### Auxiliary optimization problem
 
-$`x^*\in X`$ is a minimum of (P) iff the auxiliary optimization problem
+$`x^*\in X`$ is a **minimum** of (P) iff the auxiliary optimization problem
 
 ```math
 \begin{cases}
@@ -507,7 +791,7 @@ $`x^*\in X`$ is a minimum of (P) iff the auxiliary optimization problem
 
 has optimal value $`0`$
 
-$`x^*\in X`$ is a weak minimum of (P) iff the auxiliary optimization problem
+$`x^*\in X`$ is a **weak minimum** of (P) iff the auxiliary optimization problem
 
 ```math
 \begin{cases}
@@ -522,7 +806,7 @@ $`x^*\in X`$ is a weak minimum of (P) iff the auxiliary optimization problem
 
 has optimal value $`0`$
 
-If $`x^*`$ is a weak minimum then there exists $`\theta^*\in\mathbb{R}^s`$ such that $`(x^*,\theta^*)`$ is a solution of the system
+If $`x^*`$ is a **weak minimum** then there exists $`\theta^*\in\mathbb{R}^s`$ such that $`(x^*,\theta^*)`$ is a solution of the system
 
 ```math
 \begin{cases}
@@ -533,9 +817,11 @@ If $`x^*`$ is a weak minimum then there exists $`\theta^*\in\mathbb{R}^s`$ such 
 \end{cases}\hspace{30pt}(S)
 ```
 
-If the problem is convex, the above condition is also sufficient. If $`\theta^*>0`$ then $`x^*`$ is a minimum.
+If the problem is convex, the above condition is also sufficient. If $`\theta^*\gt 0`$ then $`x^*`$ is a **minimum**.
 
-If $`x^*`$ is a weak minimum of (P) and ACQ holds at $`x^*`$,
+### Multiobjective KKT system
+
+If $`x^*`$ is a **weak minimum** of (P) and ACQ holds at $`x^*`$,
 then there exists $`\theta^*\in\mathbb{R}^s,\lambda^*\in\mathbb{R}^m,\mu^*\in\mathbb{R}^p`$ such that $`(x^*,\theta^*,\lambda^*,\mu^*)`$ is a solution of the system
 
 ```math
@@ -549,8 +835,9 @@ then there exists $`\theta^*\in\mathbb{R}^s,\lambda^*\in\mathbb{R}^m,\mu^*\in\ma
 \end{cases}
 ```
 
-If the problem is unconstrained then the KKT system reduces to $`(S)`$
-If $`\theta^*>0`$ then $`x^*`$ is a minimum.
+If the problem is unconstrained then the KKT system reduces to $`(S)`$.
+
+If $`\theta^*>0`$ then $`x^*`$ is a **minimum**.
 
 ### Weighted sum method
 
